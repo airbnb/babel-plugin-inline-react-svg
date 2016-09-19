@@ -8,16 +8,16 @@ For example, the following code...
 import React from 'react';
 import CloseSVG from './close.svg';
 
-export default const MyComponent = () => <CloseSvg />;
+const MyComponent = () => <CloseSvg />;
 ```
 
 will be transformed into...
 
 ```jsx
 import React from 'react';
-const CloseSVG = () => <svg>{* ... *}</svg>;
+const CloseSVG = () => <svg>{/* ... */}</svg>;
 
-export default const MyComponent = () => <CloseSvg />;
+const MyComponent = () => <CloseSvg />;
 ```
 
 ## Installation

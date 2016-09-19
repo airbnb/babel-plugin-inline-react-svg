@@ -18,8 +18,7 @@ export default ({ types: t }) => ({
         // We only support the import default specifier, so let's use that identifier:
         const importIdentifier = path.node.specifiers[0].local;
         const iconPath = state.file.opts.filename;
-        const absoluteIconPath = join(__dirname, '..', iconPath);
-        const svgPath = join(dirname(absoluteIconPath), path.node.source.value);
+        const svgPath = join(dirname(iconPath), path.node.source.value);
         const svgSource = readFileSync(svgPath, 'utf8');
         const optimizedSvgSource = optimize(svgSource);
 

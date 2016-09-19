@@ -30,13 +30,13 @@ function validateAndFix(opts) {
   if (Array.isArray(opts.plugins) && opts.plugins.length === 0) return;
 
   // track whether its defined in opts.plugins
-  var state = essentialPlugins.reduce((p, c) => Object.assign(p, {[c]: false}), {});
+  const state = essentialPlugins.reduce((p, c) => Object.assign(p, { [c]: false }), {});
 
-  opts.plugins.map(p => {
+  opts.plugins.forEach((p) => {
     if (typeof p === 'string' && isEssentialPlugin(p)) {
       state[p] = true;
     } else if (typeof p === 'object') {
-      Object.keys(p).forEach(k => {
+      Object.keys(p).forEach((k) => {
         if (isEssentialPlugin(k)) {
           // make it essential
           if (!p[k]) p[k] = true;
@@ -52,12 +52,12 @@ function validateAndFix(opts) {
     .forEach(key => opts.plugins.push(key));
 }
 
-module.exports = function optimize(content) {
+export default function optimize(content) {
   validateAndFix(SVGO_OPTIONS);
   const svgo = new Svgo(SVGO_OPTIONS);
 
-  // Babel needs to be sync, so we fake it:
-  var returnValue;
+  // Svgo isn't _really_ async, so let's do it this way:
+  let returnValue;
   svgo.optimize(content, (response) => {
     if (response.error) {
       returnValue = response.error;
@@ -66,7 +66,5 @@ module.exports = function optimize(content) {
     }
   });
 
-
-  while (!returnValue) {}
   return returnValue;
 }

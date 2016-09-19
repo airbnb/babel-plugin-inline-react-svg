@@ -10,9 +10,20 @@ const buildSvg = template(`
   var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
 `);
 
+let ignoreRegex;
+
 export default ({ types: t }) => ({
   visitor: {
     ImportDeclaration(path, state) {
+      const { ignorePattern } = state.opts;
+      if (ignorePattern) {
+        // Only set the ignoreRegex once:
+        ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
+        // Test if we should ignore this:
+        if (ignoreRegex.test(path.node.source.value)) {
+          return;
+        }
+      }
       // This plugin only applies for SVGs:
       if (extname(path.node.source.value) === '.svg') {
         // We only support the import default specifier, so let's use that identifier:

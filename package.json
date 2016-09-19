@@ -1,0 +1,48 @@
+{
+  "name": "babel-plugin-inline-react-svg",
+  "version": "0.1.0",
+  "description": "A babel plugin that optimizes and inlines SVGs for your react components.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sanity": "babel-node test/sanity.js",
+    "build": "babel src --out-dir lib",
+    "lint": "eslint src/",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kesne/babel-plugin-inline-react-svg.git"
+  },
+  "keywords": [
+    "babel",
+    "plugin",
+    "react",
+    "svg",
+    "inline"
+  ],
+  "author": "Jordan Gensler <jordan.gensler@airbnb.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kesne/babel-plugin-inline-react-svg/issues"
+  },
+  "homepage": "https://github.com/kesne/babel-plugin-inline-react-svg#readme",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-core": "^6.14.0",
+    "babel-preset-airbnb": "^2.0.0",
+    "eslint": "^3.5.0",
+    "eslint-config-airbnb": "^11.1.0",
+    "eslint-plugin-import": "^1.15.0",
+    "eslint-plugin-jsx-a11y": "^2.2.2",
+    "eslint-plugin-react": "^6.2.2",
+    "react": "^15.3.1"
+  },
+  "dependencies": {
+    "babel-template": "^6.15.0",
+    "babel-traverse": "^6.15.0",
+    "babylon": "^6.10.0",
+    "lodash.isplainobject": "^4.0.6",
+    "svgo": "^0.7.0"
+  }
+}

@@ -1,8 +1,9 @@
-import { extname, dirname, join } from 'path';
+import { extname, dirname } from 'path';
 import { readFileSync } from 'fs';
 import template from 'babel-template';
 import traverse from 'babel-traverse';
 import { parse } from 'babylon';
+import resolveFrom from 'resolve-from';
 import optimize from './optimize';
 import transformSvg from './transformSvg';
 
@@ -29,7 +30,7 @@ export default ({ types: t }) => ({
         // We only support the import default specifier, so let's use that identifier:
         const importIdentifier = path.node.specifiers[0].local;
         const iconPath = state.file.opts.filename;
-        const svgPath = join(dirname(iconPath), path.node.source.value);
+        const svgPath = resolveFrom(dirname(iconPath), path.node.source.value);
         const svgSource = readFileSync(svgPath, 'utf8');
         const optimizedSvgSource = optimize(svgSource);
 

@@ -5,6 +5,7 @@ import traverse from 'babel-traverse';
 import { parse } from 'babylon';
 import resolveFrom from 'resolve-from';
 import optimize from './optimize';
+import escapeBraces from './escapeBraces';
 import transformSvg from './transformSvg';
 
 const buildSvg = template(`
@@ -33,8 +34,9 @@ export default ({ types: t }) => ({
         const svgPath = resolveFrom(dirname(iconPath), path.node.source.value);
         const svgSource = readFileSync(svgPath, 'utf8');
         const optimizedSvgSource = optimize(svgSource);
+        const escapeSvgSource = escapeBraces(optimizedSvgSource);
 
-        const parsedSvgAst = parse(optimizedSvgSource, {
+        const parsedSvgAst = parse(escapeSvgSource, {
           sourceType: 'module',
           plugins: ['jsx'],
         });

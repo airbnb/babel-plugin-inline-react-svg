@@ -20,6 +20,16 @@ const CloseSVG = () => <svg>{/* ... */}</svg>;
 const MyComponent = () => <CloseSvg />;
 ```
 
+You can also import SVGs from other NPM packages. Here I'm importing an SVG from a fictive `example` package:
+
+
+```jsx
+import React from 'react';
+import CloseSVG from 'example/assets/close.svg';
+
+const MyComponent = () => <CloseSvg />;
+```
+
 ## Installation
 
 ```

@@ -12,6 +12,19 @@ const buildSvg = template(`
 
 let ignoreRegex;
 
+const readImportSync = (path, state) => {
+  const iconPath = state.file.opts.filename;
+  const importText = path.node.source.value;
+
+  try {
+    const svgPath = join(dirname(iconPath), importText);
+    return readFileSync(svgPath, 'utf8');
+  } catch (e) {
+    const svgPath = require.resolve(importText);
+    return readFileSync(svgPath, 'utf8');
+  }
+};
+
 export default ({ types: t }) => ({
   visitor: {
     ImportDeclaration(path, state) {
@@ -28,9 +41,7 @@ export default ({ types: t }) => ({
       if (extname(path.node.source.value) === '.svg') {
         // We only support the import default specifier, so let's use that identifier:
         const importIdentifier = path.node.specifiers[0].local;
-        const iconPath = state.file.opts.filename;
-        const svgPath = join(dirname(iconPath), path.node.source.value);
-        const svgSource = readFileSync(svgPath, 'utf8');
+        const svgSource = readImportSync(path, state);
         const optimizedSvgSource = optimize(svgSource);
 
         const parsedSvgAst = parse(optimizedSvgSource, {

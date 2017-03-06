@@ -4,7 +4,7 @@ import template from 'babel-template';
 import traverse from 'babel-traverse';
 import { parse } from 'babylon';
 import optimize from './optimize';
-import escape from './escape';
+import escapeBraces from './escapeBraces';
 import transformSvg from './transformSvg';
 
 const buildSvg = template(`
@@ -33,7 +33,7 @@ export default ({ types: t }) => ({
         const svgPath = join(dirname(iconPath), path.node.source.value);
         const svgSource = readFileSync(svgPath, 'utf8');
         const optimizedSvgSource = optimize(svgSource);
-        const escapeSvgSource = escape(optimizedSvgSource);
+        const escapeSvgSource = escapeBraces(optimizedSvgSource);
 
         const parsedSvgAst = parse(escapeSvgSource, {
           sourceType: 'module',

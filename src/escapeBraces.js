@@ -2,7 +2,7 @@
 if there is a <style> element (which will, of
 course, have curly braces) then we need to
 escape those for JSX parsing. */
-export default function escape(raw) {
+export default function escapeBraces(raw) {
   // converts
   // <style> .class1 {} .class2{}</style>
   // to

@@ -33,7 +33,7 @@ export default ({ types: t }) => ({
         const iconPath = state.file.opts.filename;
         const svgPath = resolveFrom(dirname(iconPath), path.node.source.value);
         const svgSource = readFileSync(svgPath, 'utf8');
-        const optimizedSvgSource = optimize(svgSource);
+        const optimizedSvgSource = optimize(svgSource, state.opts.svgo);
         const escapeSvgSource = escapeBraces(optimizedSvgSource);
 
         const parsedSvgAst = parse(escapeSvgSource, {

@@ -4,8 +4,6 @@
 import Svgo from 'svgo';
 import isPlainObject from 'lodash.isplainobject';
 
-const SVGO_OPTIONS = {};
-
 const essentialPlugins = ['removeDoctype', 'removeComments'];
 
 function isEssentialPlugin(p) {
@@ -52,9 +50,9 @@ function validateAndFix(opts) {
     .forEach(key => opts.plugins.push(key));
 }
 
-export default function optimize(content) {
-  validateAndFix(SVGO_OPTIONS);
-  const svgo = new Svgo(SVGO_OPTIONS);
+export default function optimize(content, opts = {}) {
+  validateAndFix(opts);
+  const svgo = new Svgo(opts);
 
   // Svgo isn't _really_ async, so let's do it this way:
   let returnValue;

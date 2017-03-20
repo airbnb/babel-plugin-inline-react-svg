@@ -43,6 +43,30 @@ npm install --save-dev babel-plugin-inline-react-svg
 #### Options
 
 - *`ignorePattern`* - A pattern that imports will be tested against to selectively ignore imports.
+- *`svgo`* - svgo options. Example:
+```json
+{
+  "plugins": [
+    [
+      "inline-react-svg",
+      {
+        "svgo": {
+          "plugins": [
+            {
+              "removeAttrs": { "attrs": "(data-name)" }
+            },
+            {
+              "cleanupIds": true
+            }
+          ]
+
+        }
+      }
+    ]
+  ]
+}
+
+```
 
 ### Via CLI
 

@@ -56,7 +56,7 @@ npm install --save-dev babel-plugin-inline-react-svg
               "removeAttrs": { "attrs": "(data-name)" }
             },
             {
-              "cleanupIds": true
+              "cleanupIDs": true
             }
           ]
 

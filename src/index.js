@@ -16,7 +16,7 @@ let ignoreRegex;
 
 export default ({ types: t }) => ({
   visitor: {
-    ImportDeclaration (path, state) {
+    ImportDeclaration(path, state) {
       const { ignorePattern } = state.opts;
       if (ignorePattern) {
         // Only set the ignoreRegex once:
@@ -33,9 +33,9 @@ export default ({ types: t }) => ({
         const iconPath = state.file.opts.filename;
         const svgPath = resolveFrom(dirname(iconPath), path.node.source.value);
         const rawSource = readFileSync(svgPath, 'utf8');
-        let optimizedSource = state.opts.svgo === false
-          ? optimize(rawSource, state.opts.svgo)
-          : rawSource
+        const optimizedSource = state.opts.svgo === false
+          ? rawSource
+          : optimize(rawSource, state.opts.svgo);
 
         const escapeSvgSource = escapeBraces(optimizedSource);
 

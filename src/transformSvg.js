@@ -44,7 +44,10 @@ export default t => ({
       // <svg stroke-width="5">
       // to
       // <svg strokeWidth="5">
-      path.node.name.name = hyphenToCamel(path.node.name.name);
+      // don't convert any custom data-* attributes
+      if (!path.node.name.name.startsWith('data-')) {
+        path.node.name.name = hyphenToCamel(path.node.name.name);
+      }
     }
   },
 

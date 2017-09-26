@@ -7,6 +7,7 @@ import resolveFrom from 'resolve-from';
 import optimize from './optimize';
 import escapeBraces from './escapeBraces';
 import transformSvg from './transformSvg';
+import fileExistsWithCaseSync from './fileExistsWithCaseSync';
 
 const buildSvg = template(`
   var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
@@ -17,7 +18,7 @@ let ignoreRegex;
 export default ({ types: t }) => ({
   visitor: {
     ImportDeclaration(path, state) {
-      const { ignorePattern } = state.opts;
+      const { ignorePattern, caseSensitive } = state.opts;
       if (ignorePattern) {
         // Only set the ignoreRegex once:
         ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
@@ -32,6 +33,9 @@ export default ({ types: t }) => ({
         const importIdentifier = path.node.specifiers[0].local;
         const iconPath = state.file.opts.filename;
         const svgPath = resolveFrom(dirname(iconPath), path.node.source.value);
+        if(caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+          throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+        }
         const rawSource = readFileSync(svgPath, 'utf8');
         const optimizedSource = state.opts.svgo === false
           ? rawSource

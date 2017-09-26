@@ -13,6 +13,11 @@ const buildSvg = template(`
   var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
 `);
 
+const buildSvgWithDefaults = template(`
+  var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
+  SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;
+`);
+
 let ignoreRegex;
 
 export default ({ types: t }) => ({
@@ -52,12 +57,40 @@ export default ({ types: t }) => ({
 
         const svgCode = traverse.removeProperties(parsedSvgAst.program.body[0].expression);
 
-        const svgReplacement = buildSvg({
+        const opts = {
           SVG_NAME: importIdentifier,
           SVG_CODE: svgCode,
-        });
+        };
 
-        path.replaceWith(svgReplacement);
+        // Move props off of element and into defaultProps
+        if (svgCode.openingElement.attributes.length > 1) {
+          const keepProps = [];
+          const defaultProps = [];
+
+          svgCode.openingElement.attributes.forEach((prop) => {
+            if (prop.type === 'JSXSpreadAttribute') {
+              keepProps.push(prop);
+            } else {
+              defaultProps.push(
+                t.objectProperty(
+                  t.identifier(prop.name.name),
+                  prop.value,
+                )
+              );
+            }
+          });
+
+          svgCode.openingElement.attributes = keepProps;
+          opts.SVG_DEFAULT_PROPS_CODE = t.objectExpression(defaultProps);
+        }
+
+        if (opts.SVG_DEFAULT_PROPS_CODE) {
+          const svgReplacement = buildSvgWithDefaults(opts);
+          path.replaceWithMultiple(svgReplacement);
+        } else {
+          const svgReplacement = buildSvg(opts);
+          path.replaceWith(svgReplacement);
+        }
       }
     },
   },

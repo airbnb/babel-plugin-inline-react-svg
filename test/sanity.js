@@ -1,5 +1,15 @@
 import { transformFile } from 'babel-core';
 
+function assertReactImport(result) {
+  const match = result.code.match(/import React from 'react'/);
+  if (!match) {
+    throw new Error('no React import found');
+  }
+  if (match.length !== 1) {
+    throw new Error('more or less than one match found');
+  }
+}
+
 transformFile('test/fixtures/test.jsx', {
   babelrc: false,
   presets: ['react'],
@@ -8,7 +18,20 @@ transformFile('test/fixtures/test.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
+  assertReactImport(result);
   console.log('test/fixtures/test.jsx', result.code);
+});
+
+transformFile('test/fixtures/test-no-react.jsx', {
+  babelrc: false,
+  presets: ['react'],
+  plugins: [
+    '../../src/index',
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-no-react.jsx', result.code);
+  assertReactImport(result);
 });
 
 transformFile('test/fixtures/test-case-sensitive.jsx', {

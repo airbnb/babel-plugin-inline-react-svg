@@ -1,26 +1,27 @@
 import { transformFile } from 'babel-core';
 
 transformFile('test/fixtures/test.jsx', {
-  presets: ['airbnb'],
+  babelrc: false,
+  presets: ['react'],
   plugins: [
     '../../src/index',
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log(result.code);
+  console.log('test/fixtures/test.jsx', result.code);
 });
 
 transformFile('test/fixtures/test-case-sensitive.jsx', {
-  presets: ['airbnb'],
+  babelrc: false,
+  presets: ['react'],
   plugins: [
-    ['../../src/index',
-    {
-        "caseSensitive": true
-    }]
+    ['../../src/index', {
+      caseSensitive: true,
+    }],
   ],
-}, (err, result) => {
+}, (err) => {
   if (err && err.message.indexOf('match case') !== -1) {
-    console.log("Test passed: Expected case sensitive error was thrown");
+    console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
   } else {
     throw new Error("Test failed: Expected case sensitive error wasn't thrown");
   }

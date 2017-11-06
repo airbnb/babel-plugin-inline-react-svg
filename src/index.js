@@ -24,7 +24,7 @@ let ignoreRegex;
 export default ({ types: t }) => ({
   visitor: {
     Program: {
-      exit({ scope, node }) {
+      enter({ scope, node }) {
         if (!scope.hasBinding('React')) {
           const reactImportDeclaration = t.importDeclaration([
             t.importDefaultSpecifier(t.identifier('React')),

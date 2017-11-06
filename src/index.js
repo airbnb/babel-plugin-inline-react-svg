@@ -4,6 +4,7 @@ import template from 'babel-template';
 import traverse from 'babel-traverse';
 import { parse } from 'babylon';
 import resolveFrom from 'resolve-from';
+
 import optimize from './optimize';
 import escapeBraces from './escapeBraces';
 import transformSvg from './transformSvg';
@@ -22,23 +23,35 @@ let ignoreRegex;
 
 export default ({ types: t }) => ({
   visitor: {
+    Program: {
+      exit({ scope, node }) {
+        if (!scope.hasBinding('React')) {
+          const reactImportDeclaration = t.importDeclaration([
+            t.importDefaultSpecifier(t.identifier('React')),
+          ], t.stringLiteral('react'));
+
+          node.body.unshift(reactImportDeclaration);
+        }
+      },
+    },
     ImportDeclaration(path, state) {
+      const importPath = path.node.source.value;
       const { ignorePattern, caseSensitive } = state.opts;
       if (ignorePattern) {
         // Only set the ignoreRegex once:
         ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
         // Test if we should ignore this:
-        if (ignoreRegex.test(path.node.source.value)) {
+        if (ignoreRegex.test(importPath)) {
           return;
         }
       }
       // This plugin only applies for SVGs:
-      if (extname(path.node.source.value) === '.svg') {
+      if (extname(importPath) === '.svg') {
         // We only support the import default specifier, so let's use that identifier:
         const importIdentifier = path.node.specifiers[0].local;
         const iconPath = state.file.opts.filename;
-        const svgPath = resolveFrom(dirname(iconPath), path.node.source.value);
-        if(caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+        const svgPath = resolveFrom(dirname(iconPath), importPath);
+        if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
           throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
         }
         const rawSource = readFileSync(svgPath, 'utf8');

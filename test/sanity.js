@@ -49,3 +49,17 @@ transformFile('test/fixtures/test-case-sensitive.jsx', {
     throw new Error("Test failed: Expected case sensitive error wasn't thrown");
   }
 });
+
+transformFile('test/fixtures/test-no-svg-or-react.js', {
+  babelrc: false,
+  presets: [],
+  plugins: [
+    '../../src/index',
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-no-svg-or-react.js', result.code);
+  if (/React/.test(result.code)) {
+    throw new Error('Test failed: React import was present');
+  }
+});

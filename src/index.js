@@ -24,19 +24,22 @@ let ignoreRegex;
 export default ({ types: t }) => ({
   visitor: {
     Program: {
-      enter({ scope, node }) {
+      enter({ scope, node }, { file }) {
         if (!scope.hasBinding('React')) {
           const reactImportDeclaration = t.importDeclaration([
             t.importDefaultSpecifier(t.identifier('React')),
           ], t.stringLiteral('react'));
 
-          node.body.unshift(reactImportDeclaration);
+          file.set('ensureReact', () => { node.body.unshift(reactImportDeclaration); });
+        } else {
+          file.set('ensureReact', () => {});
         }
       },
     },
     ImportDeclaration(path, state) {
       const importPath = path.node.source.value;
       const { ignorePattern, caseSensitive } = state.opts;
+      const { file } = state;
       if (ignorePattern) {
         // Only set the ignoreRegex once:
         ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
@@ -104,6 +107,7 @@ export default ({ types: t }) => ({
           const svgReplacement = buildSvg(opts);
           path.replaceWith(svgReplacement);
         }
+        file.get('ensureReact')();
       }
     },
   },

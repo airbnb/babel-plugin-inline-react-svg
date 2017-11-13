@@ -19,7 +19,86 @@ const buildSvgWithDefaults = template(`
   SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;
 `);
 
+const exportSVG = template(`
+  var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
+  export { SVG_NAME };
+`);
+
+const exportSVGwithDefaults = template(`
+  var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
+  SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;
+  export { SVG_NAME };
+`);
+
 let ignoreRegex;
+
+function transform(t, path, state) {
+  const { source } = path.node;
+  if (!source) { return false; }
+  const importPath = source.value;
+  const { ignorePattern, caseSensitive } = state.opts;
+  if (ignorePattern) {
+    // Only set the ignoreRegex once:
+    ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
+    // Test if we should ignore this:
+    if (ignoreRegex.test(importPath)) {
+      return false;
+    }
+  }
+  // This plugin only applies for SVGs:
+  if (extname(importPath) === '.svg') {
+    // We only support the import default specifier, so let's use that identifier:
+    const importIdentifier = path.node.specifiers[0].local;
+    const iconPath = state.file.opts.filename;
+    const svgPath = resolveFrom(dirname(iconPath), importPath);
+    if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+      throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+    }
+    if (!svgPath) {
+      throw new Error(`File path does not exist: ${importPath}`);
+    }
+    const rawSource = readFileSync(svgPath, 'utf8');
+    const optimizedSource = state.opts.svgo === false
+      ? rawSource
+      : optimize(rawSource, state.opts.svgo);
+
+    const escapeSvgSource = escapeBraces(optimizedSource);
+
+    const parsedSvgAst = parse(escapeSvgSource, {
+      sourceType: 'module',
+      plugins: ['jsx'],
+    });
+
+    traverse(parsedSvgAst, transformSvg(t));
+
+    const svgCode = traverse.removeProperties(parsedSvgAst.program.body[0].expression);
+
+    const opts = {
+      SVG_NAME: importIdentifier,
+      SVG_CODE: svgCode,
+    };
+
+    // Move props off of element and into defaultProps
+    if (svgCode.openingElement.attributes.length > 1) {
+      const keepProps = [];
+      const defaultProps = [];
+
+      svgCode.openingElement.attributes.forEach((prop) => {
+        if (prop.type === 'JSXSpreadAttribute') {
+          keepProps.push(prop);
+        } else {
+          defaultProps.push(t.objectProperty(t.identifier(prop.name.name), prop.value));
+        }
+      });
+
+      svgCode.openingElement.attributes = keepProps;
+      opts.SVG_DEFAULT_PROPS_CODE = t.objectExpression(defaultProps);
+    }
+
+    return opts;
+  }
+  return false;
+}
 
 export default ({ types: t }) => ({
   visitor: {
@@ -36,78 +115,34 @@ export default ({ types: t }) => ({
         }
       },
     },
-    ImportDeclaration(path, state) {
-      const importPath = path.node.source.value;
-      const { ignorePattern, caseSensitive } = state.opts;
+    ExportNamedDeclaration(path, state) {
+      const opts = transform(t, path, state);
+      if (!opts) { return; }
+
+      if (opts.SVG_DEFAULT_PROPS_CODE) {
+        const svgReplacement = exportSVGwithDefaults(opts);
+        path.replaceWithMultiple(svgReplacement);
+      } else {
+        const svgReplacement = exportSVG(opts);
+        path.replaceWith(svgReplacement);
+      }
       const { file } = state;
-      if (ignorePattern) {
-        // Only set the ignoreRegex once:
-        ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
-        // Test if we should ignore this:
-        if (ignoreRegex.test(importPath)) {
-          return;
-        }
+      file.get('ensureReact')();
+      file.set('ensureReact', () => {});
+    },
+    ImportDeclaration(path, state) {
+      const opts = transform(t, path, state);
+      if (!opts) { return; }
+
+      if (opts.SVG_DEFAULT_PROPS_CODE) {
+        const svgReplacement = buildSvgWithDefaults(opts);
+        path.replaceWithMultiple(svgReplacement);
+      } else {
+        const svgReplacement = buildSvg(opts);
+        path.replaceWith(svgReplacement);
       }
-      // This plugin only applies for SVGs:
-      if (extname(importPath) === '.svg') {
-        // We only support the import default specifier, so let's use that identifier:
-        const importIdentifier = path.node.specifiers[0].local;
-        const iconPath = state.file.opts.filename;
-        const svgPath = resolveFrom(dirname(iconPath), importPath);
-        if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
-          throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
-        }
-        if (!svgPath) {
-          throw new Error(`File path does not exist: ${importPath}`);
-        }
-        const rawSource = readFileSync(svgPath, 'utf8');
-        const optimizedSource = state.opts.svgo === false
-          ? rawSource
-          : optimize(rawSource, state.opts.svgo);
-
-        const escapeSvgSource = escapeBraces(optimizedSource);
-
-        const parsedSvgAst = parse(escapeSvgSource, {
-          sourceType: 'module',
-          plugins: ['jsx'],
-        });
-
-        traverse(parsedSvgAst, transformSvg(t));
-
-        const svgCode = traverse.removeProperties(parsedSvgAst.program.body[0].expression);
-
-        const opts = {
-          SVG_NAME: importIdentifier,
-          SVG_CODE: svgCode,
-        };
-
-        // Move props off of element and into defaultProps
-        if (svgCode.openingElement.attributes.length > 1) {
-          const keepProps = [];
-          const defaultProps = [];
-
-          svgCode.openingElement.attributes.forEach((prop) => {
-            if (prop.type === 'JSXSpreadAttribute') {
-              keepProps.push(prop);
-            } else {
-              defaultProps.push(t.objectProperty(t.identifier(prop.name.name), prop.value));
-            }
-          });
-
-          svgCode.openingElement.attributes = keepProps;
-          opts.SVG_DEFAULT_PROPS_CODE = t.objectExpression(defaultProps);
-        }
-
-        if (opts.SVG_DEFAULT_PROPS_CODE) {
-          const svgReplacement = buildSvgWithDefaults(opts);
-          path.replaceWithMultiple(svgReplacement);
-        } else {
-          const svgReplacement = buildSvg(opts);
-          path.replaceWith(svgReplacement);
-        }
-        file.get('ensureReact')();
-        file.set('ensureReact', () => {});
-      }
+      const { file } = state;
+      file.get('ensureReact')();
     },
   },
 });

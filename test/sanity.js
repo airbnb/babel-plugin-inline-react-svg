@@ -81,3 +81,18 @@ transformFile('test/fixtures/test-no-svg-or-react.js', {
     throw new Error('Test failed: React import was present');
   }
 });
+
+transformFile('test/fixtures/test-export-from.jsx', {
+  babelrc: false,
+  presets: ['react'],
+  plugins: [
+    '../../src/index',
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-export-from.jsx', result.code);
+  assertReactImport(result);
+  if (!/React\.createElement/.test(result.code)) {
+    throw new Error('no react elements found');
+  }
+});

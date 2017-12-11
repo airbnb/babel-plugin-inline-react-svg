@@ -3,6 +3,7 @@
 // for the babylon JSX parser to work
 import Svgo from 'svgo';
 import isPlainObject from 'lodash.isplainobject';
+import sync from 'promise-synchronizer';
 
 const essentialPlugins = ['removeDoctype', 'removeComments'];
 
@@ -56,15 +57,21 @@ export default function optimize(content, opts = {}) {
   validateAndFix(opts);
   const svgo = new Svgo(opts);
 
-  // Svgo isn't _really_ async, so let's do it this way:
+  // Svgo isn't _really_ async, it however is async enough to require some handling:
   let returnValue;
-  svgo.optimize(content, (response) => {
-    if (response.error) {
-      returnValue = response.error;
-    } else {
-      returnValue = response.data;
-    }
-  });
+  try {
+    sync(svgo.optimize(content)
+      .then((response) => {
+        if (response.error) {
+          throw response.error;
+        } else {
+          returnValue = response.data;
+        }
+      })
+    );
+  } catch (error) {
+    returnValue = error;
+  }
 
   return returnValue;
 }

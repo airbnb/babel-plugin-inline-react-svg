@@ -8,7 +8,7 @@ For example, the following code...
 import React from 'react';
 import CloseSVG from './close.svg';
 
-const MyComponent = () => <CloseSvg />;
+const MyComponent = () => <CloseSVG />;
 ```
 
 will be transformed into...
@@ -17,7 +17,7 @@ will be transformed into...
 import React from 'react';
 const CloseSVG = () => <svg>{/* ... */}</svg>;
 
-const MyComponent = () => <CloseSvg />;
+const MyComponent = () => <CloseSVG />;
 ```
 
 ## Installation

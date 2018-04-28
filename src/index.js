@@ -111,6 +111,7 @@ export default ({ types: t }) => ({
           path.replaceWith(svgReplacement);
         }
         file.get('ensureReact')();
+        file.set('ensureReact', () => {});
       }
     },
   },

@@ -57,6 +57,9 @@ export default ({ types: t }) => ({
         if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
           throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
         }
+        if (!svgPath) {
+          throw new Error(`File path does not exist: ${importPath}`);
+        }
         const rawSource = readFileSync(svgPath, 'utf8');
         const optimizedSource = state.opts.svgo === false
           ? rawSource
@@ -108,6 +111,7 @@ export default ({ types: t }) => ({
           path.replaceWith(svgReplacement);
         }
         file.get('ensureReact')();
+        file.set('ensureReact', () => {});
       }
     },
   },

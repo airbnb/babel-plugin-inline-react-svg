@@ -18,6 +18,7 @@ function validateAndFix(opts) {
       typeof opts.plugins === 'undefined' ||
       (Array.isArray(opts.plugins) && opts.plugins.length === 0)
     ) {
+      /* eslint no-param-reassign: 1 */
       opts.plugins = [...essentialPlugins];
       return;
     }
@@ -39,6 +40,7 @@ function validateAndFix(opts) {
           // make it essential
           if (!p[k]) p[k] = true;
           // and update state
+          /* eslint no-param-reassign: 1 */
           state[k] = true;
         }
       });

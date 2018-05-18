@@ -1,4 +1,6 @@
 import { transformFile } from 'babel-core';
+import fs from 'fs';
+import path from 'path';
 
 function assertReactImport(result) {
   const match = result.code.match(/import React from 'react'/g);
@@ -46,21 +48,25 @@ transformFile('test/fixtures/test-no-react.jsx', {
   assertReactImport(result);
 });
 
-transformFile('test/fixtures/test-case-sensitive.jsx', {
-  babelrc: false,
-  presets: ['react'],
-  plugins: [
-    ['../../src/index', {
-      caseSensitive: true,
-    }],
-  ],
-}, (err) => {
-  if (err && err.message.indexOf('match case') !== -1) {
-    console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
-  } else {
-    throw new Error("Test failed: Expected case sensitive error wasn't thrown");
-  }
-});
+if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
+  transformFile('test/fixtures/test-case-sensitive.jsx', {
+    babelrc: false,
+    presets: ['react'],
+    plugins: [
+      ['../../src/index', {
+        caseSensitive: true,
+      }],
+    ],
+  }, (err) => {
+    if (err && err.message.indexOf('match case') !== -1) {
+      console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
+    } else {
+      throw new Error("Test failed: Expected case sensitive error wasn't thrown");
+    }
+  });
+} else {
+  console.log('# SKIP: case-sensitive check; on a case-sensitive filesystem');
+}
 
 transformFile('test/fixtures/test-no-svg-or-react.js', {
   babelrc: false,

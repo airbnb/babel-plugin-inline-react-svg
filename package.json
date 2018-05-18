@@ -40,11 +40,11 @@
     "react": "^15.3.1"
   },
   "dependencies": {
-    "babel-template": "^6.15.0",
-    "babel-traverse": "^6.15.0",
-    "babylon": "^6.10.0",
+    "babel-template": "^6.26.0",
+    "babel-traverse": "^6.26.0",
+    "babylon": "^6.18.0",
     "lodash.isplainobject": "^4.0.6",
     "resolve-from": "^2.0.0",
-    "svgo": "^0.7.0"
+    "svgo": "^0.7.2"
   }
 }

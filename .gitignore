@@ -1,2 +1,8 @@
+# gitignore
 node_modules
 lib
+
+# Only apps should have lockfiles
+npm-shrinkwrap.json
+package-lock.json
+yarn.lock

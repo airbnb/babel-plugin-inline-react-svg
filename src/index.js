@@ -90,12 +90,7 @@ export default ({ types: t }) => ({
             if (prop.type === 'JSXSpreadAttribute') {
               keepProps.push(prop);
             } else {
-              defaultProps.push(
-                t.objectProperty(
-                  t.identifier(prop.name.name),
-                  prop.value,
-                )
-              );
+              defaultProps.push(t.objectProperty(t.identifier(prop.name.name), prop.value));
             }
           });
 

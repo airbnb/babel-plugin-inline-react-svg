@@ -13,9 +13,10 @@ export default t => ({
       // <svg xmlns:xlink="asdf">
       // to
       // <svg xmlnsXlink="asdf">
-      path.node.name = t.jSXIdentifier(
-        namespaceToCamel(path.node.name.namespace.name, path.node.name.name.name)
-      );
+      path.node.name = t.jSXIdentifier(namespaceToCamel(
+        path.node.name.namespace.name,
+        path.node.name.name.name,
+      ));
     } else if (t.isJSXIdentifier(path.node.name)) {
       // converts
       // <tag class="blah blah1"/>
@@ -33,11 +34,9 @@ export default t => ({
         const csso = cssToObj(path.node.value.value);
         const properties = Object.keys(csso).map(prop => t.objectProperty(
           t.identifier(hyphenToCamel(prop)),
-          t.stringLiteral(csso[prop])
+          t.stringLiteral(csso[prop]),
         ));
-        path.node.value = t.jSXExpressionContainer(
-          t.objectExpression(properties)
-        );
+        path.node.value = t.jSXExpressionContainer(t.objectExpression(properties));
       }
 
       // converts
@@ -59,11 +58,7 @@ export default t => ({
   JSXOpeningElement(path) {
     if (path.node.name.name.toLowerCase() === 'svg') {
       // add spread props
-      path.node.attributes.push(
-        t.jSXSpreadAttribute(
-          t.identifier('props')
-        )
-      );
+      path.node.attributes.push(t.jSXSpreadAttribute(t.identifier('props')));
     }
   },
 });

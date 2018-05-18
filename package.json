@@ -5,10 +5,13 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "sanity": "babel-node test/sanity.js",
+    "pretests-only": "npm run build",
+    "tests-only": "babel-node test/sanity.js",
     "build": "babel src --out-dir lib",
     "lint": "eslint src/",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "pretest": "npm run lint",
+    "test": "npm run tests-only"
   },
   "repository": {
     "type": "git",

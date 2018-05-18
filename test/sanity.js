@@ -12,7 +12,7 @@ function assertReactImport(result) {
   }
 }
 
-transformFile('test/fixtures/test.jsx', {
+transformFile('test/fixtures/test-import.jsx', {
   babelrc: false,
   presets: ['react'],
   plugins: [
@@ -21,7 +21,7 @@ transformFile('test/fixtures/test.jsx', {
 }, (err, result) => {
   if (err) throw err;
   assertReactImport(result);
-  console.log('test/fixtures/test.jsx', result.code);
+  console.log('test/fixtures/test-import.jsx', result.code);
 });
 
 transformFile('test/fixtures/test-multiple-svg.jsx', {
@@ -80,4 +80,25 @@ transformFile('test/fixtures/test-no-svg-or-react.js', {
   if (/React/.test(result.code)) {
     throw new Error('Test failed: React import was present');
   }
+});
+
+transformFile('test/fixtures/test-import.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    '../../src/index',
+  ],
+}, (err1, importResult) => {
+  if (err1) throw err1;
+  console.log('test/fixtures/test-import.jsx', importResult.code);
+  transformFile('test/fixtures/test-require.jsx', {
+    presets: ['airbnb'],
+    plugins: [
+      '../../src/index',
+    ],
+  }, (err2, requireResult) => {
+    if (err2) throw err2;
+    if (importResult.code !== requireResult.code) {
+      throw new Error('Test failed: Import and require tests don\'t match');
+    }
+  });
 });

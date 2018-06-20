@@ -43,8 +43,10 @@ export default t => ({
       // <svg stroke-width="5">
       // to
       // <svg strokeWidth="5">
-      // don't convert any custom data-* attributes
-      if (!path.node.name.name.startsWith('data-')) {
+      // don't convert any custom data-* or aria-* attributes just wrap in quotes
+      if (/^data-|^aria-/.test(path.node.name.name)) {
+        path.node.name.name = `'${path.node.name.name}'`;
+      } else {
         path.node.name.name = hyphenToCamel(path.node.name.name);
       }
     }

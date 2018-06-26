@@ -46,7 +46,7 @@
     "babel-traverse": "^6.26.0",
     "babylon": "^6.18.0",
     "lodash.isplainobject": "^4.0.6",
-    "resolve-from": "^2.0.0",
+    "resolve": "^1.8.1",
     "svgo": "^0.7.2"
   }
 }

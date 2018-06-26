@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import template from 'babel-template';
 import traverse from 'babel-traverse';
 import { parse } from 'babylon';
-import resolveFrom from 'resolve-from';
+import resolve from 'resolve';
 
 import optimize from './optimize';
 import escapeBraces from './escapeBraces';
@@ -36,7 +36,7 @@ export default ({ types: t }) => {
     // This plugin only applies for SVGs:
     if (extname(importPath) === '.svg') {
       const iconPath = state.file.opts.filename;
-      const svgPath = resolveFrom(dirname(iconPath), importPath);
+      const svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
       if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
         throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
       }

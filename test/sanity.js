@@ -111,3 +111,13 @@ transformFile('test/fixtures/test-import.jsx', {
     }
   });
 });
+
+transformFile('test/fixtures/test-dynamic-require.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    '../../src/index',
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-dynamic-require.jsx', result.code);
+});

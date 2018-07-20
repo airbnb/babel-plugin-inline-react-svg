@@ -23,6 +23,9 @@ let ignoreRegex;
 
 export default ({ types: t }) => {
   function applyPlugin(importIdentifier, importPath, path, state) {
+    if (typeof importPath !== 'string') {
+      throw new TypeError('`applyPlugin` `importPath` must be a string');
+    }
     const { ignorePattern, caseSensitive } = state.opts;
     const { file } = state;
     if (ignorePattern) {
@@ -110,8 +113,9 @@ export default ({ types: t }) => {
       },
       CallExpression(path, state) {
         const { node } = path;
-        const filePath = node.arguments.length > 0 && node.arguments[0].value;
-        if (node.callee.name === 'require' && t.isVariableDeclarator(path.parent)) {
+        const requireArg = node.arguments.length > 0 ? node.arguments[0] : null;
+        const filePath = t.isStringLiteral(requireArg) ? requireArg.value : null;
+        if (node.callee.name === 'require' && t.isVariableDeclarator(path.parent) && filePath) {
           applyPlugin(path.parent.id, filePath, path.parentPath.parentPath, state);
         }
       },

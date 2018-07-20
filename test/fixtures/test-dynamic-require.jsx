@@ -1,5 +1,8 @@
 import React from 'react';
-import MySvg from './close.svg';
+
+const MySvg = require('./close.svg');
+
+export const foo = require(path.join(pkgBase, 'package.json')); // regression test
 
 export default function MyFunctionIcon() {
   return <MySvg />;

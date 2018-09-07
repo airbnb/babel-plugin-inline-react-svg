@@ -33,6 +33,21 @@ transformFile('test/fixtures/test-import.jsx', {
   console.log('test/fixtures/test-import.jsx', result.code);
 });
 
+transformFile('test/fixtures/test-import.jsx', {
+  babelrc: false,
+  presets: ['react'],
+  plugins: [
+    ['../../src/index', {
+      svgo: false,
+    }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  assertReactImport(result);
+  validateDefaultProps(result);
+  console.log('test/fixtures/test-import.jsx', result.code);
+});
+
 transformFile('test/fixtures/test-multiple-svg.jsx', {
   babelrc: false,
   presets: ['@babel/preset-react'],

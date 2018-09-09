@@ -108,7 +108,7 @@ transformFile('test/fixtures/test-import.jsx', {
   }, (err2, requireResult) => {
     if (err2) throw err2;
     if (importResult.code !== requireResult.code) {
-      throw new Error('Test failed: Import and require tests don\'t match');
+      throw new Error("Test failed: Import and require tests don't match");
     }
   });
 });

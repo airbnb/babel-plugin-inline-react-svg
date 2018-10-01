@@ -71,7 +71,7 @@ if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
     if (err && err.message.indexOf('match case') !== -1) {
       console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
     } else {
-      throw new Error("Test failed: Expected case sensitive error wasn't thrown");
+      throw new Error('Test failed: Expected case sensitive error wasn‘t thrown');
     }
   });
 } else {
@@ -108,7 +108,7 @@ transformFile('test/fixtures/test-import.jsx', {
   }, (err2, requireResult) => {
     if (err2) throw err2;
     if (importResult.code !== requireResult.code) {
-      throw new Error("Test failed: Import and require tests don't match");
+      throw new Error('Test failed: Import and require tests don‘t match');
     }
   });
 });

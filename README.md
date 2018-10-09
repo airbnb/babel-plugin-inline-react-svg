@@ -79,7 +79,7 @@ $ babel --plugins inline-react-svg script.js
 
 
 ```javascript
-require('babel-core').transform('code', {
+require('@babel/core').transform('code', {
   plugins: ['inline-react-svg']
 }) // => { code, map, ast };
 ```

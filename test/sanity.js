@@ -1,9 +1,10 @@
-import { transformFile } from 'babel-core';
+import { transformFile } from '@babel/core';
 import fs from 'fs';
 import path from 'path';
+import inlineReactSvgPlugin from '../src';
 
 function assertReactImport(result) {
-  const match = result.code.match(/import React from 'react'/g);
+  const match = result.code.match(/import React from ['"]react['"]/g);
   if (!match) {
     throw new Error('no React import found');
   }
@@ -20,9 +21,9 @@ function validateDefaultProps(result) {
 
 transformFile('test/fixtures/test-import.jsx', {
   babelrc: false,
-  presets: ['react'],
+  presets: ['@babel/preset-react'],
   plugins: [
-    '../../src/index',
+    inlineReactSvgPlugin,
   ],
 }, (err, result) => {
   if (err) throw err;
@@ -33,9 +34,9 @@ transformFile('test/fixtures/test-import.jsx', {
 
 transformFile('test/fixtures/test-multiple-svg.jsx', {
   babelrc: false,
-  presets: ['react'],
+  presets: ['@babel/preset-react'],
   plugins: [
-    '../../src/index',
+    inlineReactSvgPlugin,
   ],
 }, (err, result) => {
   if (err) throw err;
@@ -46,9 +47,9 @@ transformFile('test/fixtures/test-multiple-svg.jsx', {
 
 transformFile('test/fixtures/test-no-react.jsx', {
   babelrc: false,
-  presets: ['react'],
+  presets: ['@babel/preset-react'],
   plugins: [
-    '../../src/index',
+    inlineReactSvgPlugin,
   ],
 }, (err, result) => {
   if (err) throw err;
@@ -60,9 +61,9 @@ transformFile('test/fixtures/test-no-react.jsx', {
 if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
   transformFile('test/fixtures/test-case-sensitive.jsx', {
     babelrc: false,
-    presets: ['react'],
+    presets: ['@babel/preset-react'],
     plugins: [
-      ['../../src/index', {
+      [inlineReactSvgPlugin, {
         caseSensitive: true,
       }],
     ],
@@ -70,7 +71,7 @@ if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
     if (err && err.message.indexOf('match case') !== -1) {
       console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
     } else {
-      throw new Error("Test failed: Expected case sensitive error wasn't thrown");
+      throw new Error('Test failed: Expected case sensitive error wasn‘t thrown');
     }
   });
 } else {
@@ -81,7 +82,7 @@ transformFile('test/fixtures/test-no-svg-or-react.js', {
   babelrc: false,
   presets: [],
   plugins: [
-    '../../src/index',
+    inlineReactSvgPlugin,
   ],
 }, (err, result) => {
   if (err) throw err;
@@ -94,7 +95,7 @@ transformFile('test/fixtures/test-no-svg-or-react.js', {
 transformFile('test/fixtures/test-import.jsx', {
   presets: ['airbnb'],
   plugins: [
-    '../../src/index',
+    inlineReactSvgPlugin,
   ],
 }, (err1, importResult) => {
   if (err1) throw err1;
@@ -102,12 +103,12 @@ transformFile('test/fixtures/test-import.jsx', {
   transformFile('test/fixtures/test-require.jsx', {
     presets: ['airbnb'],
     plugins: [
-      '../../src/index',
+      inlineReactSvgPlugin,
     ],
   }, (err2, requireResult) => {
     if (err2) throw err2;
     if (importResult.code !== requireResult.code) {
-      throw new Error('Test failed: Import and require tests don\'t match');
+      throw new Error('Test failed: Import and require tests don‘t match');
     }
   });
 });
@@ -115,7 +116,7 @@ transformFile('test/fixtures/test-import.jsx', {
 transformFile('test/fixtures/test-dynamic-require.jsx', {
   presets: ['airbnb'],
   plugins: [
-    '../../src/index',
+    inlineReactSvgPlugin,
   ],
 }, (err, result) => {
   if (err) throw err;

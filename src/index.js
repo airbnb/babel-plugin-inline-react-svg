@@ -1,6 +1,7 @@
 import { extname, dirname } from 'path';
 import { readFileSync } from 'fs';
-import { parse } from 'babylon';
+import { parse } from '@babel/parser';
+import { declare } from '@babel/helper-plugin-utils';
 import resolve from 'resolve';
 
 import optimize from './optimize';
@@ -10,7 +11,14 @@ import fileExistsWithCaseSync from './fileExistsWithCaseSync';
 
 let ignoreRegex;
 
-export default ({ template, traverse, types: t }) => {
+export default declare(({
+  assertVersion,
+  template,
+  traverse,
+  types: t,
+}) => {
+  assertVersion(7);
+
   const buildSvg = template(`
   var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
 `);
@@ -125,4 +133,4 @@ export default ({ template, traverse, types: t }) => {
       },
     },
   };
-};
+});

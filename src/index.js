@@ -1,7 +1,5 @@
 import { extname, dirname } from 'path';
 import { readFileSync } from 'fs';
-import template from 'babel-template';
-import traverse from 'babel-traverse';
 import { parse } from 'babylon';
 import resolve from 'resolve';
 
@@ -10,18 +8,18 @@ import escapeBraces from './escapeBraces';
 import transformSvg from './transformSvg';
 import fileExistsWithCaseSync from './fileExistsWithCaseSync';
 
-const buildSvg = template(`
+let ignoreRegex;
+
+export default ({ template, traverse, types: t }) => {
+  const buildSvg = template(`
   var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
 `);
 
-const buildSvgWithDefaults = template(`
+  const buildSvgWithDefaults = template(`
   var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
   SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;
 `);
 
-let ignoreRegex;
-
-export default ({ types: t }) => {
   function applyPlugin(importIdentifier, importPath, path, state) {
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');

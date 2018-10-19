@@ -1,4 +1,4 @@
-import { transformFile } from '@babel/core';
+import { transformFile, transform } from '@babel/core';
 import fs from 'fs';
 import path from 'path';
 import inlineReactSvgPlugin from '../src';
@@ -121,4 +121,14 @@ transformFile('test/fixtures/test-dynamic-require.jsx', {
 }, (err, result) => {
   if (err) throw err;
   console.log('test/fixtures/test-dynamic-require.jsx', result.code);
+});
+
+transform(fs.readFileSync('test/fixtures/test-import-read-file.jsx'), {
+  presets: ['airbnb'],
+  plugins: [
+    inlineReactSvgPlugin,
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-import-read-file.jsx', result.code);
 });

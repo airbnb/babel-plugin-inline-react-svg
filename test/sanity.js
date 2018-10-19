@@ -71,7 +71,7 @@ if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
     if (err && err.message.indexOf('match case') !== -1) {
       console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
     } else {
-      throw new Error('Test failed: Expected case sensitive error wasn‘t thrown');
+      throw new Error('Test failed: Expected case sensitive error wasn‘t thrown, got: ' + err.message);
     }
   });
 } else {
@@ -123,10 +123,11 @@ transformFile('test/fixtures/test-dynamic-require.jsx', {
   console.log('test/fixtures/test-dynamic-require.jsx', result.code);
 });
 
-transform(fs.readFileSync('test/fixtures/test-import-read-file.jsx'), {
+const filename = 'test/fixtures/test-import-read-file.jsx';
+transform(fs.readFileSync(filename), {
   presets: ['airbnb'],
   plugins: [
-    inlineReactSvgPlugin,
+    [inlineReactSvgPlugin, { filename }],
   ],
 }, (err, result) => {
   if (err) throw err;

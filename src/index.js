@@ -32,8 +32,8 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive } = state.opts;
-    const { file } = state;
+    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const { file, filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
       ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
@@ -44,7 +44,7 @@ export default declare(({
     }
     // This plugin only applies for SVGs:
     if (extname(importPath) === '.svg') {
-      const iconPath = state.file.opts.filename;
+      const iconPath = filename || providedFilename;
       const svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
       if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
         throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
@@ -105,7 +105,13 @@ export default declare(({
   return {
     visitor: {
       Program: {
-        enter({ scope, node }, { file }) {
+        enter({ scope, node }, { file, opts, filename }) {
+          if (typeof filename === 'string' && typeof opts.filename !== 'undefined') {
+            throw new TypeError('the "filename" option may only be provided when transforming code');
+          }
+          if (typeof filename === 'undefined' && typeof opts.filename !== 'string') {
+            throw new TypeError('the "filename" option is required when transforming code');
+          }
           if (!scope.hasBinding('React')) {
             const reactImportDeclaration = t.importDeclaration([
               t.importDefaultSpecifier(t.identifier('React')),

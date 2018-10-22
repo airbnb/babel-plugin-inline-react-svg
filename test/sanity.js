@@ -133,3 +133,23 @@ transform(fs.readFileSync(filename), {
   if (err) throw err;
   console.log('test/fixtures/test-import-read-file.jsx', result.code);
 });
+
+transformFile('test/fixtures/test-export-default.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    inlineReactSvgPlugin,
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-export-default.jsx', result.code);
+});
+
+transformFile('test/fixtures/test-export-default-as.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    inlineReactSvgPlugin,
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-export-default-as.jsx', result.code);
+});

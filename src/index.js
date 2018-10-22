@@ -1,4 +1,4 @@
-import { extname, dirname } from 'path';
+import { extname, dirname, parse as parseFilename } from 'path';
 import { readFileSync } from 'fs';
 import { parse } from '@babel/parser';
 import { declare } from '@babel/helper-plugin-utils';
@@ -19,16 +19,33 @@ export default declare(({
 }) => {
   assertVersion(7);
 
-  const buildSvg = template(`
-  var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
-`);
+  const buildSvg = ({
+    IS_EXPORT,
+    EXPORT_FILENAME,
+    SVG_NAME,
+    SVG_CODE,
+    SVG_DEFAULT_PROPS_CODE,
+  }) => {
+    const namedTemplate = `
+      var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
+      ${SVG_DEFAULT_PROPS_CODE ? 'SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}      
+      ${IS_EXPORT ? 'export { SVG_NAME };' : ''}
+    `;
+    const anonymousTemplate = `
+      var Component = function (props) { return SVG_CODE; };
+      ${SVG_DEFAULT_PROPS_CODE ? 'Component.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
+      Component.displayName = 'EXPORT_FILENAME';
+      export default Component;
+    `;
 
-  const buildSvgWithDefaults = template(`
-  var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
-  SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;
-`);
+    if (SVG_NAME !== 'default') {
+      return template(namedTemplate)({ SVG_NAME, SVG_CODE, SVG_DEFAULT_PROPS_CODE });
+    }
+    return template(anonymousTemplate)({ SVG_CODE, SVG_DEFAULT_PROPS_CODE, EXPORT_FILENAME });
+  };
 
-  function applyPlugin(importIdentifier, importPath, path, state) {
+
+  function applyPlugin(importIdentifier, importPath, path, state, isExport, exportFilename) {
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
@@ -71,6 +88,8 @@ export default declare(({
       const opts = {
         SVG_NAME: importIdentifier,
         SVG_CODE: svgCode,
+        IS_EXPORT: isExport,
+        EXPORT_FILENAME: exportFilename,
       };
 
       // Move props off of element and into defaultProps
@@ -91,7 +110,7 @@ export default declare(({
       }
 
       if (opts.SVG_DEFAULT_PROPS_CODE) {
-        const svgReplacement = buildSvgWithDefaults(opts);
+        const svgReplacement = buildSvg(opts);
         path.replaceWithMultiple(svgReplacement);
       } else {
         const svgReplacement = buildSvg(opts);
@@ -135,6 +154,14 @@ export default declare(({
         const { node } = path;
         if (node.specifiers.length > 0) {
           applyPlugin(node.specifiers[0].local, node.source.value, path, state);
+        }
+      },
+      ExportNamedDeclaration(path, state) {
+        const { node } = path;
+        if (node.specifiers.length > 0 && node.specifiers[0].local.name === 'default') {
+          const exportName = node.specifiers[0].exported.name;
+          const filename = parseFilename(node.source.value).name;
+          applyPlugin(exportName, node.source.value, path, state, true, filename);
         }
       },
     },

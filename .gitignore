@@ -1,3 +1,6 @@
+# IDE configs
+.idea
+
 # gitignore
 node_modules
 lib

@@ -1,5 +1,5 @@
-import { extname, dirname, parse as parseFilename } from 'path';
-import { readFileSync } from 'fs';
+import { extname, dirname, parse as parseFilename, resolve as resolvePath } from 'path';
+import { readFileSync, existsSync } from 'fs';
 import { parse } from '@babel/parser';
 import { declare } from '@babel/helper-plugin-utils';
 import resolve from 'resolve';
@@ -65,17 +65,17 @@ export default declare(({
       let svgPath;
 
       if (aliasMatch) {
-        const resolveRoot = resolve(process.cwd(), root || './');
-        const aliasedPath = resolve(resolveRoot, aliasMatch);
-        svgPath = aliasedPath + importPath.replace(aliasMatch , '');
+        const resolveRoot = resolvePath(process.cwd(), root || './');
+        const aliasedPath = resolvePath(resolveRoot, aliasMatch);
+        svgPath = resolvePath(aliasedPath, importPath.replace(`${aliasMatch}/`, ''));
       } else {
         svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
-        if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
-          throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
-        }
       }
 
-      if (!svgPath) {
+      if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+        throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+      }
+      if (!svgPath || !existsSync(svgPath)) {
         throw new Error(`File path does not exist: ${importPath}`);
       }
       const rawSource = readFileSync(svgPath, 'utf8');

@@ -48,7 +48,7 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const { ignorePattern, caseSensitive, filename: providedFilename, root, alias } = state.opts;
     const { file, filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
@@ -61,10 +61,20 @@ export default declare(({
     // This plugin only applies for SVGs:
     if (extname(importPath) === '.svg') {
       const iconPath = filename || providedFilename;
-      const svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
-      if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
-        throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+      const aliasMatch = alias[importPath.split('/')[0]];
+      let svgPath;
+
+      if (aliasMatch) {
+        const resolveRoot = resolve(process.cwd(), root || './');
+        const aliasedPath = resolve(resolveRoot, aliasMatch);
+        svgPath = aliasedPath + importPath.replace(aliasMatch , '');
+      } else {
+        svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
+        if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+          throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+        }
       }
+
       if (!svgPath) {
         throw new Error(`File path does not exist: ${importPath}`);
       }

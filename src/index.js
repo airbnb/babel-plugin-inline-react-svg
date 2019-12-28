@@ -28,7 +28,7 @@ export default declare(({
   }) => {
     const namedTemplate = `
       var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
-      ${SVG_DEFAULT_PROPS_CODE ? 'SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}      
+      ${SVG_DEFAULT_PROPS_CODE ? 'SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
       ${IS_EXPORT ? 'export { SVG_NAME };' : ''}
     `;
     const anonymousTemplate = `
@@ -43,7 +43,6 @@ export default declare(({
     }
     return template(anonymousTemplate)({ SVG_CODE, SVG_DEFAULT_PROPS_CODE, EXPORT_FILENAME });
   };
-
 
   function applyPlugin(importIdentifier, importPath, path, state, isExport, exportFilename) {
     if (typeof importPath !== 'string') {
@@ -124,19 +123,22 @@ export default declare(({
   return {
     visitor: {
       Program: {
-        enter({ scope, node }, { file, opts, filename }) {
+        enter(path, { file, opts, filename }) {
           if (typeof filename === 'string' && typeof opts.filename !== 'undefined') {
             throw new TypeError('the "filename" option may only be provided when transforming code');
           }
           if (typeof filename === 'undefined' && typeof opts.filename !== 'string') {
             throw new TypeError('the "filename" option is required when transforming code');
           }
-          if (!scope.hasBinding('React')) {
+          if (!path.scope.hasBinding('React')) {
             const reactImportDeclaration = t.importDeclaration([
               t.importDefaultSpecifier(t.identifier('React')),
             ], t.stringLiteral('react'));
 
-            file.set('ensureReact', () => { node.body.unshift(reactImportDeclaration); });
+            file.set('ensureReact', () => {
+              const [newPath] = path.unshiftContainer('body', reactImportDeclaration);
+              newPath.get('specifiers').forEach((specifier) => { path.scope.registerBinding('module', specifier); });
+            });
           } else {
             file.set('ensureReact', () => {});
           }

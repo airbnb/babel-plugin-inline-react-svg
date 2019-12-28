@@ -58,6 +58,30 @@ transformFile('test/fixtures/test-no-react.jsx', {
   validateDefaultProps(result);
 });
 
+transformFile('test/fixtures/test-no-duplicate-react.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    inlineReactSvgPlugin,
+    ({
+      visitor: {
+        Program: {
+          exit({ scope }) {
+            if (!scope.hasBinding('React')) {
+              throw new Error('React binding was expected.');
+            }
+          },
+        },
+      },
+    }),
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-no-duplicate-react.jsx', result.code);
+  assertReactImport(result);
+  validateDefaultProps(result);
+});
+
 if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
   transformFile('test/fixtures/test-case-sensitive.jsx', {
     babelrc: false,
@@ -71,7 +95,7 @@ if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
     if (err && err.message.indexOf('match case') !== -1) {
       console.log('test/fixtures/test-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
     } else {
-      throw new Error('Test failed: Expected case sensitive error wasn‘t thrown, got: ' + err.message);
+      throw new Error(`Test failed: Expected case sensitive error wasn‘t thrown, got: ${err.message}`);
     }
   });
 } else {

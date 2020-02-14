@@ -61,24 +61,40 @@ export default declare(({
     // This plugin only applies for SVGs:
     if (extname(importPath) === '.svg') {
       const iconPath = filename || providedFilename;
-      const aliasMatch = alias[importPath.split('/')[0]];
-      let svgPath;
+      const aliasPart = importPath.split('/')[0];
+      const aliasMatch = alias[aliasPart];
+      const svgPaths = [];
+      let chosenPath;
 
       if (aliasMatch) {
         const resolveRoot = resolvePath(process.cwd(), root || './');
-        const aliasedPath = resolvePath(resolveRoot, aliasMatch);
-        svgPath = resolvePath(aliasedPath, importPath.replace(`${aliasMatch}/`, ''));
+        const aliasMatches = typeof aliasMatch === 'string' ? [aliasMatch] : aliasMatch;
+
+        aliasMatches.forEach((match) => {
+          const aliasedPath = resolvePath(resolveRoot, match);
+          svgPaths.push(resolvePath(aliasedPath, importPath.replace(`${aliasPart}/`, '')));
+        });
       } else {
-        svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
+        svgPaths.push(resolve.sync(importPath, { basedir: dirname(iconPath) }));
       }
 
-      if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
-        throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+      for (let i = 0; i < svgPaths.length; i += 1) {
+        const svgPath = svgPaths[i];
+        if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+          throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+        }
+
+        if (svgPath && existsSync(svgPath)) {
+          chosenPath = svgPath;
+          break;
+        }
       }
-      if (!svgPath || !existsSync(svgPath)) {
+
+      if (!chosenPath) {
         throw new Error(`File path does not exist: ${importPath}`);
       }
-      const rawSource = readFileSync(svgPath, 'utf8');
+
+      const rawSource = readFileSync(chosenPath, 'utf8');
       const optimizedSource = state.opts.svgo === false
         ? rawSource
         : optimize(rawSource, state.opts.svgo);

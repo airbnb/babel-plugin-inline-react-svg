@@ -55,7 +55,7 @@ export default declare(({
       ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
       // Test if we should ignore this:
       if (ignoreRegex.test(importPath)) {
-        return;
+        return undefined;
       }
     }
     // This plugin only applies for SVGs:
@@ -108,16 +108,17 @@ export default declare(({
         opts.SVG_DEFAULT_PROPS_CODE = t.objectExpression(defaultProps);
       }
 
-      if (opts.SVG_DEFAULT_PROPS_CODE) {
-        const svgReplacement = buildSvg(opts);
-        path.replaceWithMultiple(svgReplacement);
-      } else {
-        const svgReplacement = buildSvg(opts);
-        path.replaceWith(svgReplacement);
-      }
       file.get('ensureReact')();
       file.set('ensureReact', () => {});
+
+      if (opts.SVG_DEFAULT_PROPS_CODE) {
+        const svgReplacement = buildSvg(opts);
+        return path.replaceWithMultiple(svgReplacement)[0];
+      }
+      const svgReplacement = buildSvg(opts);
+      return path.replaceWith(svgReplacement);
     }
+    return undefined;
   }
 
   return {
@@ -159,11 +160,12 @@ export default declare(({
         }
       },
       ExportNamedDeclaration(path, state) {
-        const { node } = path;
+        const { node, scope } = path;
         if (node.specifiers.length > 0 && node.specifiers[0].local && node.specifiers[0].local.name === 'default') {
           const exportName = node.specifiers[0].exported.name;
           const filename = parseFilename(node.source.value).name;
-          applyPlugin(exportName, node.source.value, path, state, true, filename);
+          const newPath = applyPlugin(exportName, node.source.value, path, state, true, filename);
+          if (newPath) scope.registerDeclaration(newPath);
         }
       },
     },

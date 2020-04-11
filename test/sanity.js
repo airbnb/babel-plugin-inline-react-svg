@@ -1,6 +1,7 @@
 import { transformFile, transform } from '@babel/core';
 import fs from 'fs';
 import path from 'path';
+import transformTs from '@babel/plugin-transform-typescript';
 import inlineReactSvgPlugin from '../src';
 
 function assertReactImport(result) {
@@ -172,6 +173,12 @@ transformFile('test/fixtures/test-export-default-as.jsx', {
   presets: ['airbnb'],
   plugins: [
     inlineReactSvgPlugin,
+    [transformTs, { isTSX: true }],
+    () => ({
+      pre() {
+        console.warn = (msg) => { throw new Error(`Got console.warn: ${msg}`); };
+      },
+    }),
   ],
 }, (err, result) => {
   if (err) throw err;

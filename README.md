@@ -66,7 +66,27 @@ npm install --save-dev babel-plugin-inline-react-svg
     ]
   ]
 }
+```
 
+- *`root`* - A relative path string (Starting from CWD) that is used for alias resolution.
+- *`alias`* - An object describing aliases for module resolution where the key is the alias to be used and the value is a string or array of paths. Example:
+
+```javascript
+['babel-plugin-inline-react-svg', {
+  root: path.resolve(__dirname),
+  alias: {
+    images: 'src/images'
+    icons: ['src/images/icons', 'node_modules/external-module/icons']
+  }
+}],
+```
+
+```javascript
+// Resolved to <root>/src/images/logo.svg
+import MySvg from 'images/logo.svg';
+
+// Checks first for <root>/src/images/icons/cross.svg, then <root>/node_modules/external-module/icons/cross.svg
+import AnotherSvg from 'icons/cross.svg';
 ```
 
 ### Via CLI

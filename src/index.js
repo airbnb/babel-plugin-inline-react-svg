@@ -1,4 +1,9 @@
-import { extname, dirname, parse as parseFilename, resolve as resolvePath } from 'path';
+import {
+  extname,
+  dirname,
+  parse as parseFilename,
+  resolve as resolvePath,
+} from 'path';
 import { readFileSync, existsSync } from 'fs';
 import { parse } from '@babel/parser';
 import { declare } from '@babel/helper-plugin-utils';
@@ -48,7 +53,13 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename, root, alias } = state.opts;
+    const {
+      ignorePattern,
+      caseSensitive,
+      filename: providedFilename,
+      root,
+      alias,
+    } = state.opts;
     const { file, filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
@@ -62,7 +73,7 @@ export default declare(({
     if (extname(importPath) === '.svg') {
       const iconPath = filename || providedFilename;
       const aliasPart = importPath.split('/')[0];
-      const aliasMatch = alias[aliasPart];
+      const aliasMatch = alias ? alias[aliasPart] : undefined;
       const svgPaths = [];
       let chosenPath;
 

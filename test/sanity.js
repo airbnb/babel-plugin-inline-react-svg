@@ -177,3 +177,136 @@ transformFile('test/fixtures/test-export-default-as.jsx', {
   if (err) throw err;
   console.log('test/fixtures/test-export-default-as.jsx', result.code);
 });
+
+/**
+ * Alias tests
+ */
+// Alias without root
+transformFile('test/fixtures/test-alias.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    [inlineReactSvgPlugin, {
+      alias: {
+        myalias: 'test/fixtures',
+      },
+    }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-alias.jsx (without root)', result.code);
+});
+
+// Alias with root
+transformFile('test/fixtures/test-alias.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    [inlineReactSvgPlugin, {
+      root: path.resolve(__dirname),
+      alias: {
+        myalias: 'fixtures',
+      },
+    }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-alias.jsx (with root)', result.code);
+});
+
+// Alias with root including subdirectory
+transformFile('test/fixtures/test-alias.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    [inlineReactSvgPlugin, {
+      root: path.resolve(__dirname, '..', 'test'),
+      alias: {
+        myalias: 'fixtures',
+      },
+    }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-alias.jsx (with complex root)', result.code);
+});
+
+// Multiple aliases defined
+transformFile('test/fixtures/test-alias-multiple.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    [inlineReactSvgPlugin, {
+      root: path.resolve(__dirname),
+      alias: {
+        myalias: 'fixtures',
+        myalias2: 'fixtures',
+      },
+    }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-alias.jsx (with multiple aliases)', result.code);
+});
+
+// Alias with multiple folders
+transformFile('test/fixtures/test-alias-folders.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    [inlineReactSvgPlugin, {
+      root: path.resolve(__dirname),
+      alias: {
+        myalias: ['fixtures', 'fixtures/testfolder'],
+      },
+    }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-alias-folders.jsx', result.code);
+});
+
+// Error on import failure with aliases
+transformFile('test/fixtures/test-alias.jsx', {
+  babelrc: false,
+  presets: ['@babel/preset-react'],
+  plugins: [
+    [inlineReactSvgPlugin, {
+      root: path.resolve(__dirname),
+      alias: {
+        myalias: 'fixtures/testfolder',
+      },
+    }],
+  ],
+}, (err, result) => {
+  if (err && err.message.indexOf('File path does not exist') !== -1) {
+    console.log('test/fixtures/test-alias.jsx (no svg)', 'Test passed: Expected file path does not exist was thrown');
+  } else {
+    throw new Error(`Test failed: Expected file path does not exist wasn't thrown, got: ${err.message}`);
+  }
+});
+
+// Error on case mismatch
+if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {
+  transformFile('test/fixtures/test-alias-case-sensitive.jsx', {
+    babelrc: false,
+    presets: ['@babel/preset-react'],
+    plugins: [
+      [inlineReactSvgPlugin, {
+        caseSensitive: true,
+        root: path.resolve(__dirname),
+        alias: {
+          myalias: 'fixtures',
+        },
+      }],
+    ],
+  }, (err) => {
+    if (err && err.message.indexOf('match case') !== -1) {
+      console.log('test/fixtures/test-alias-case-sensitive.jsx', 'Test passed: Expected case sensitive error was thrown');
+    } else {
+      throw new Error(`Test failed: Expected case sensitive error wasn‘t thrown, got: ${err.message}`);
+    }
+  });
+} else {
+  console.log('# SKIP: alias case-sensitive check; on a case-sensitive filesystem');
+}

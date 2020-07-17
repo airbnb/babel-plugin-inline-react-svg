@@ -22,9 +22,19 @@ const MyComponent = () => <CloseSVG />;
 
 ## Installation
 
+You only need to install this package as a dev dependency because it's only needed during compilation.
+
+For NPM:
+
 ```
-npm install --save-dev babel-plugin-inline-react-svg
+npm install -D babel-plugin-inline-react-svg
 ```
+
+For Yarn:
+```
+yarn add -D babel-plugin-inline-react-svg
+```
+
 
 ## Usage
 

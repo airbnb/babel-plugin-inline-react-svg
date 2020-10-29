@@ -177,3 +177,13 @@ transformFile('test/fixtures/test-export-default-as.jsx', {
   if (err) throw err;
   console.log('test/fixtures/test-export-default-as.jsx', result.code);
 });
+
+transformFile('test/fixtures/test-export-all-as.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    inlineReactSvgPlugin,
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-export-all-as.jsx', result.code);
+});

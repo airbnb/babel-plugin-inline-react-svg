@@ -160,7 +160,7 @@ export default declare(({
       },
       ExportNamedDeclaration(path, state) {
         const { node } = path;
-        if (node.specifiers.length > 0 && node.specifiers[0].local.name === 'default') {
+        if (node.specifiers.length > 0 && node.specifiers[0].local && node.specifiers[0].local.name === 'default') {
           const exportName = node.specifiers[0].exported.name;
           const filename = parseFilename(node.source.value).name;
           applyPlugin(exportName, node.source.value, path, state, true, filename);

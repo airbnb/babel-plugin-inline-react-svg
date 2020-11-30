@@ -48,7 +48,7 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const { ignorePattern, caseSensitive, filename: providedFilename, noReactAutoImport } = state.opts;
     const { file, filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
@@ -130,7 +130,7 @@ export default declare(({
           if (typeof filename === 'undefined' && typeof opts.filename !== 'string') {
             throw new TypeError('the "filename" option is required when transforming code');
           }
-          if (!path.scope.hasBinding('React')) {
+          if (!opts.noReactAutoImport && !path.scope.hasBinding('React')) {
             const reactImportDeclaration = t.importDeclaration([
               t.importDefaultSpecifier(t.identifier('React')),
             ], t.stringLiteral('react'));

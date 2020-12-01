@@ -1,4 +1,4 @@
-import { extname, dirname, parse as parseFilename } from 'path';
+import { extname, dirname } from 'path';
 import { readFileSync } from 'fs';
 import { parse } from '@babel/parser';
 import { declare } from '@babel/helper-plugin-utils';

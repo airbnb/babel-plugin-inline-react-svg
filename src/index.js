@@ -49,7 +49,7 @@ export default declare(({
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
     const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
-    const { filename } = state;
+    const { file, filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
       ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
@@ -115,6 +115,9 @@ export default declare(({
         const svgReplacement = buildSvg(opts);
         path.replaceWith(svgReplacement);
       }
+
+      file.get('ensureReact')();
+      file.set('ensureReact', () => {});
     }
   }
 

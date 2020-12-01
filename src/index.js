@@ -48,8 +48,8 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename, noReactAutoImport } = state.opts;
-    const { file, filename } = state;
+    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const { filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
       ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
@@ -115,56 +115,58 @@ export default declare(({
         const svgReplacement = buildSvg(opts);
         path.replaceWith(svgReplacement);
       }
-      file.get('ensureReact')();
-      file.set('ensureReact', () => {});
     }
   }
 
   return {
     visitor: {
       Program: {
-        enter(path, { file, opts, filename }) {
+        enter(rootPath, state) {
+          const { opts, filename, file } = state;
           if (typeof filename === 'string' && typeof opts.filename !== 'undefined') {
             throw new TypeError('the "filename" option may only be provided when transforming code');
           }
           if (typeof filename === 'undefined' && typeof opts.filename !== 'string') {
             throw new TypeError('the "filename" option is required when transforming code');
           }
-          if (!opts.noReactAutoImport && !path.scope.hasBinding('React')) {
+
+          if (!opts.noReactAutoImport && !rootPath.scope.hasBinding('React')) {
             const reactImportDeclaration = t.importDeclaration([
               t.importDefaultSpecifier(t.identifier('React')),
             ], t.stringLiteral('react'));
 
             file.set('ensureReact', () => {
-              const [newPath] = path.unshiftContainer('body', reactImportDeclaration);
-              newPath.get('specifiers').forEach((specifier) => { path.scope.registerBinding('module', specifier); });
+              const [newPath] = rootPath.unshiftContainer('body', reactImportDeclaration);
+              newPath.get('specifiers').forEach((specifier) => { rootPath.scope.registerBinding('module', specifier); });
             });
           } else {
             file.set('ensureReact', () => {});
           }
+
+          rootPath.traverse({
+            CallExpression(path) {
+              const { node } = path;
+              const requireArg = node.arguments.length > 0 ? node.arguments[0] : null;
+              const filePath = t.isStringLiteral(requireArg) ? requireArg.value : null;
+              if (node.callee.name === 'require' && t.isVariableDeclarator(path.parent) && filePath) {
+                applyPlugin(path.parent.id, filePath, path.parentPath.parentPath, state);
+              }
+            },
+            ImportDeclaration(path) {
+              const { node } = path;
+              if (node.specifiers.length > 0) {
+                applyPlugin(node.specifiers[0].local, node.source.value, path, state);
+              }
+            },
+            ExportNamedDeclaration(path) {
+              const { node } = path;
+              if (node.specifiers.length > 0 && node.specifiers[0].local && node.specifiers[0].local.name === 'default') {
+                const exportName = node.specifiers[0].exported.name;
+                applyPlugin(exportName, node.source.value, path, state, true, filename);
+              }
+            },
+          });
         },
-      },
-      CallExpression(path, state) {
-        const { node } = path;
-        const requireArg = node.arguments.length > 0 ? node.arguments[0] : null;
-        const filePath = t.isStringLiteral(requireArg) ? requireArg.value : null;
-        if (node.callee.name === 'require' && t.isVariableDeclarator(path.parent) && filePath) {
-          applyPlugin(path.parent.id, filePath, path.parentPath.parentPath, state);
-        }
-      },
-      ImportDeclaration(path, state) {
-        const { node } = path;
-        if (node.specifiers.length > 0) {
-          applyPlugin(node.specifiers[0].local, node.source.value, path, state);
-        }
-      },
-      ExportNamedDeclaration(path, state) {
-        const { node } = path;
-        if (node.specifiers.length > 0 && node.specifiers[0].local && node.specifiers[0].local.name === 'default') {
-          const exportName = node.specifiers[0].exported.name;
-          const filename = parseFilename(node.source.value).name;
-          applyPlugin(exportName, node.source.value, path, state, true, filename);
-        }
       },
     },
   };

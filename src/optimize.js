@@ -48,8 +48,8 @@ function validateAndFix(opts) {
   });
 
   Object.keys(state)
-    .filter(key => !state[key])
-    .forEach(key => opts.plugins.push(key));
+    .filter((key) => !state[key])
+    .forEach((key) => opts.plugins.push(key));
 }
 
 export default function optimize(content, opts = {}) {

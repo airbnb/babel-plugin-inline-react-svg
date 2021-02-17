@@ -75,7 +75,7 @@ export default declare(({
 
       const escapeSvgSource = escapeBraces(optimizedSource);
 
-      const parsedSvgAst = parse(escapeSvgSource, {
+      const parsedSvgAst = parse(escapeSvgSource.data, {
         sourceType: 'module',
         plugins: ['jsx'],
       });

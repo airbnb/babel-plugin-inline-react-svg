@@ -1,7 +1,7 @@
 // validates svgo opts
 // to contain minimal set of plugins that will strip some stuff
 // for the babylon JSX parser to work
-import Svgo from 'svgo';
+import * as SVGO from 'svgo';
 import isPlainObject from 'lodash.isplainobject';
 
 const essentialPlugins = ['removeDoctype', 'removeComments'];
@@ -54,17 +54,6 @@ function validateAndFix(opts) {
 
 export default function optimize(content, opts = {}) {
   validateAndFix(opts);
-  const svgo = new Svgo(opts);
 
-  // Svgo isn't _really_ async, so let's do it this way:
-  let returnValue;
-  svgo.optimize(content, (response) => {
-    if (response.error) {
-      returnValue = response.error;
-    } else {
-      returnValue = response.data;
-    }
-  });
-
-  return returnValue;
+  return SVGO.optimize(content, opts);
 }

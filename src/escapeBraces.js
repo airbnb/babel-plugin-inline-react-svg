@@ -7,5 +7,5 @@ export default function escapeBraces(raw) {
   // <style> .class1 {} .class2{}</style>
   // to
   // <style> .class1 {`{`}{`}`} .class2{`{`}{`}`}</style>
-  return raw.replace(/(\{|\})/g, '{`$1`}');
+  return { ...raw, data: raw.data.replace(/(\{|\})/g, '{`$1`}') };
 }

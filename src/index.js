@@ -70,7 +70,7 @@ export default declare(({
       }
       const rawSource = readFileSync(svgPath, 'utf8');
       const optimizedSource = state.opts.svgo === false
-        ? rawSource
+        ? { data: rawSource }
         : optimize(rawSource, state.opts.svgo);
 
       const escapeSvgSource = escapeBraces(optimizedSource);

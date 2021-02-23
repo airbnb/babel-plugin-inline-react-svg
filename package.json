@@ -50,7 +50,7 @@
     "@babel/parser": "^7.0.0",
     "lodash.isplainobject": "^4.0.6",
     "resolve": "^1.20.0",
-    "svgo": "^2.0.0"
+    "svgo": "^2.0.3"
   },
   "engines": {
     "node": ">=10.13"

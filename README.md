@@ -54,19 +54,42 @@ npm install --save-dev babel-plugin-inline-react-svg
         "svgo": {
           "plugins": [
             {
-              "removeAttrs": { "attrs": "(data-name)" }
+              "name": "removeAttrs", 
+              "params": { "attrs": "(data-name)" }
             },
-            {
-              "cleanupIDs": true
-            }
+            "cleanupIDs"
           ]
-
         }
       }
     ]
   ]
 }
 
+```
+
+**Note:** If `plugins` field is specified the default enabled `svgo` plugins will be overrided. Alternatively, if your Babel config is in JavaScript, the default list of plugins can be extended by making use of the `extendDefaultPlugins` utility provided by `svgo`.
+
+```js
+const { extendDefaultPlugins } = require('svgo');
+
+module.exports = {
+  plugins: [
+    [
+      'inline-react-svg',
+      {
+        svgo: {
+          plugins: extendDefaultPlugins([
+            {
+              name: 'removeAttrs',
+              params: { attrs: '(data-name)' }
+            },
+            'cleanupIDs',
+          ])
+        }
+      }
+    ]
+  ]
+}
 ```
 
 ### Via CLI

@@ -50,6 +50,7 @@ export default declare(({
     }
     const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
     const { file, filename } = state;
+    let newPath;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
       ignoreRegex = ignoreRegex || new RegExp(ignorePattern);
@@ -108,17 +109,17 @@ export default declare(({
         opts.SVG_DEFAULT_PROPS_CODE = t.objectExpression(defaultProps);
       }
 
+      const svgReplacement = buildSvg(opts);
+      if (opts.SVG_DEFAULT_PROPS_CODE) {
+        [newPath] = path.replaceWithMultiple(svgReplacement);
+      } else {
+        newPath = path.replaceWith(svgReplacement);
+      }
+
       file.get('ensureReact')();
       file.set('ensureReact', () => {});
-
-      if (opts.SVG_DEFAULT_PROPS_CODE) {
-        const svgReplacement = buildSvg(opts);
-        return path.replaceWithMultiple(svgReplacement)[0];
-      }
-      const svgReplacement = buildSvg(opts);
-      return path.replaceWith(svgReplacement);
     }
-    return undefined;
+    return newPath;
   }
 
   return {
@@ -165,7 +166,9 @@ export default declare(({
           const exportName = node.specifiers[0].exported.name;
           const filename = parseFilename(node.source.value).name;
           const newPath = applyPlugin(exportName, node.source.value, path, state, true, filename);
-          if (newPath) scope.registerDeclaration(newPath);
+          if (newPath) {
+            scope.registerDeclaration(newPath);
+          }
         }
       },
     },

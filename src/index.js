@@ -75,7 +75,7 @@ export default declare(({
       const rawSource = readFileSync(svgPath, 'utf8');
       const optimizedSource = state.opts.svgo === false
         ? { data: rawSource }
-        : optimize(rawSource, state.opts.svgo);
+        : optimize(rawSource, { ...state.opts.svgo, path: svgPath });
 
       const escapeSvgSource = escapeBraces(optimizedSource);
 
@@ -103,6 +103,9 @@ export default declare(({
         svgCode.openingElement.attributes.forEach((prop) => {
           if (prop.type === 'JSXSpreadAttribute') {
             keepProps.push(prop);
+          } else if (prop.value.type === 'JSXExpressionContainer') {
+            const objectExpression = t.objectExpression(prop.value.expression.properties);
+            defaultProps.push(t.objectProperty(t.identifier(prop.name.name), objectExpression));
           } else {
             defaultProps.push(t.objectProperty(t.identifier(prop.name.name), prop.value));
           }

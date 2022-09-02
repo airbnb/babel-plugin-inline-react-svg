@@ -195,6 +195,16 @@ transformFile('test/fixtures/test-export-all-as.jsx', {
   console.log('test/fixtures/test-export-all-as.jsx', result.code);
 });
 
+transformFile('test/fixtures/test-root-styled.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    inlineReactSvgPlugin,
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-root-styled.jsx', result.code);
+});
+
 transformFile('test/fixtures/test-commented.jsx', {
   presets: ['airbnb'],
   plugins: [

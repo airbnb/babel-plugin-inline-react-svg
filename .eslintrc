@@ -1,4 +1,25 @@
 {
- "extends": "airbnb",
- "root": true
+  "extends": "airbnb",
+
+  "root": true,
+
+  "ignorePatterns": [
+    "lib/",
+  ],
+
+  "overrides": [
+    {
+      "files": "test/**",
+      "rules": {
+        "no-console": "off",
+      },
+    },
+    {
+      "files": "test/fixtures/**",
+      "rules": {
+        "import/extensions": "off",
+        "import/no-unresolved": "off",
+      },
+    },
+  ],
 }

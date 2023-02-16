@@ -42,9 +42,9 @@ npm install --save-dev babel-plugin-inline-react-svg
 
 #### Options
 
-- *`ignorePattern`* - A pattern that imports will be tested against to selectively ignore imports.
-- *`caseSensitive`* - A boolean value that if true will require file paths to match with case-sensitivity. Useful to ensure consistent behavior if working on both a case-sensitive operating system like Linux and a case-insensitive one like OS X or Windows.
-- *`svgo`* - svgo options (`false` to disable). Example:
+- `ignorePattern` - A pattern that imports will be tested against to selectively ignore imports.
+- `caseSensitive` - A boolean value that if true will require file paths to match with case-sensitivity. Useful to ensure consistent behavior if working on both a case-sensitive operating system like Linux and a case-insensitive one like OS X or Windows.
+- `svgo` - svgo options (`false` to disable). Example:
 ```json
 {
   "plugins": [

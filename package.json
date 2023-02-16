@@ -4,13 +4,14 @@
   "description": "A babel plugin that optimizes and inlines SVGs for your react components.",
   "main": "lib/index.js",
   "scripts": {
-    "test": "npm run tests-only",
-    "pretests-only": "npm run build",
-    "tests-only": "babel-node test/sanity.js",
-    "build": "babel src --out-dir lib",
-    "lint": "eslint src/",
     "prepublish": "npm run build",
-    "pretest": "npm run lint"
+    "pretest": "npm run lint",
+    "lint": "eslint src/",
+    "pretests-only": "npm run build",
+    "build": "babel src --out-dir lib",
+    "test": "npm run tests-only",
+    "tests-only": "babel-node test/sanity.js",
+    "posttest": "aud --production"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "@babel/core": "^7.0.0",
     "@babel/node": "^7.12.16",
     "@babel/preset-react": "^7.12.13",
+    "aud": "^2.0.0",
     "babel-preset-airbnb": "^3.3.2",
     "eslint": "^7.20.0",
     "eslint-config-airbnb": "^18.2.1",

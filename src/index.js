@@ -1,5 +1,5 @@
-import { extname, dirname, parse as parseFilename } from 'path';
-import { readFileSync } from 'fs';
+import { extname, dirname, parse as parseFilename, resolve as resolvePath } from 'path';
+import { readFileSync, existsSync } from 'fs';
 import { parse } from '@babel/parser';
 import { declare } from '@babel/helper-plugin-utils';
 import resolve from 'resolve';
@@ -48,7 +48,7 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const { ignorePattern, caseSensitive, filename: providedFilename, root, alias } = state.opts;
     const { file, filename } = state;
     if (ignorePattern) {
       // Only set the ignoreRegex once:
@@ -61,14 +61,40 @@ export default declare(({
     // This plugin only applies for SVGs:
     if (extname(importPath) === '.svg') {
       const iconPath = filename || providedFilename;
-      const svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
-      if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
-        throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+      const aliasPart = importPath.split('/')[0];
+      const aliasMatch = alias[aliasPart];
+      const svgPaths = [];
+      let chosenPath;
+
+      if (aliasMatch) {
+        const resolveRoot = resolvePath(process.cwd(), root || './');
+        const aliasMatches = typeof aliasMatch === 'string' ? [aliasMatch] : aliasMatch;
+
+        aliasMatches.forEach((match) => {
+          const aliasedPath = resolvePath(resolveRoot, match);
+          svgPaths.push(resolvePath(aliasedPath, importPath.replace(`${aliasPart}/`, '')));
+        });
+      } else {
+        svgPaths.push(resolve.sync(importPath, { basedir: dirname(iconPath) }));
       }
-      if (!svgPath) {
+
+      for (let i = 0; i < svgPaths.length; i += 1) {
+        const svgPath = svgPaths[i];
+        if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
+          throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
+        }
+
+        if (svgPath && existsSync(svgPath)) {
+          chosenPath = svgPath;
+          break;
+        }
+      }
+
+      if (!chosenPath) {
         throw new Error(`File path does not exist: ${importPath}`);
       }
-      const rawSource = readFileSync(svgPath, 'utf8');
+
+      const rawSource = readFileSync(chosenPath, 'utf8');
       const optimizedSource = state.opts.svgo === false
         ? { data: rawSource }
         : optimize(rawSource, state.opts.svgo);

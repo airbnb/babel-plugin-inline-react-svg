@@ -2,7 +2,7 @@ import { extname, dirname, parse as parseFilename } from 'path';
 import { readFileSync } from 'fs';
 import { parse } from '@babel/parser';
 import { declare } from '@babel/helper-plugin-utils';
-import resolve from 'resolve';
+import resolve from 'resolve/sync';
 
 import optimize from './optimize';
 import escapeBraces from './escapeBraces';
@@ -61,7 +61,10 @@ export default declare(({
     // This plugin only applies for SVGs:
     if (extname(importPath) === '.svg') {
       const iconPath = filename || providedFilename;
-      const svgPath = resolve.sync(importPath, { basedir: dirname(iconPath) });
+      const svgPath = resolve(importPath, {
+        basedir: dirname(iconPath),
+        preserveSymlinks: true,
+      });
       if (caseSensitive && !fileExistsWithCaseSync(svgPath)) {
         throw new Error(`File path didn't match case of file on disk: ${svgPath}`);
       }

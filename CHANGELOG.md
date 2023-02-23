@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.2](https://github.com/airbnb/babel-plugin-inline-react-svg/compare/v2.0.1...v2.0.2) - 2023-02-22
+
+### Merged
+
+- [actions] make a "summary" job, to require for protected branches [`#120`](https://github.com/airbnb/babel-plugin-inline-react-svg/pull/120)
+- Tweak some formatting in readme [`#119`](https://github.com/airbnb/babel-plugin-inline-react-svg/pull/119)
+- migrate from travis to github actions [`#117`](https://github.com/airbnb/babel-plugin-inline-react-svg/pull/117)
+
+### Fixed
+
+- [Fix] Register export declaration in scope [`#74`](https://github.com/airbnb/babel-plugin-inline-react-svg/issues/74)
+
+### Commits
+
+- [meta] add `auto-changelog` [`0137651`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/0137651421d95db064157f13cc7ac96a2506cfeb)
+- [Tests] migrate from travis to github actions [`63611b5`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/63611b5524c5a8cc97d5a21de0ffab86e5627d95)
+- [Dev Deps] update `@babel/cli`, `@babel/node`, `@babel/preset-react`, `eslint`, `eslint-config-airbnb`, `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, `eslint-plugin-react` [`b839b94`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/b839b94cb0341da187b2220b69bacb664e5e6891)
+- [readme] Update svgo configuration example [`e37c29b`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/e37c29bbea03d8cfcb12503c4924662c7fc1f286)
+- [Fix] Fix crash when svg has a style tag in the root element; pass path to SVGO [`a4c1c4c`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/a4c1c4c5d11b088185f8ccc603ac00c352bde45b)
+- [meta] use `npmignore` to autogenerate an npmignore file [`aeb3ddf`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/aeb3ddff9cf66927f96226543ac2c5868be23271)
+- [Deps] update `resolve`, `svgo` [`b29d6a6`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/b29d6a64de7ffc8f29e91c16e4d7f15044367930)
+- [meta] add `safe-publish-latest` and use `prepublishOnly` [`982144b`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/982144bce6bb749885e2d898aa16dc515936a3c2)
+- [Dev Deps] update `@babel/cli`, `@babel/plugin-transform-typescript` [`815bb4a`](https://github.com/airbnb/babel-plugin-inline-react-svg/commit/815bb4a466c03bce4d9cc6a2b3310fa99fa54d6c)
+
 ## [v2.0.1](https://github.com/airbnb/babel-plugin-inline-react-svg/compare/v2.0.0...v2.0.1) - 2021-02-23
 
 ### Commits

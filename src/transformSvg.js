@@ -44,9 +44,9 @@ export default (t) => ({
       // <svg stroke-width="5">
       // to
       // <svg strokeWidth="5">
-      // don't convert any custom data-* or aria-* attributes just wrap in quotes
+      // don't convert any custom data-* or aria-* attributes
       if (/^data-|^aria-/.test(originalName.name)) {
-        originalName.name = `'${originalName.name}'`;
+        originalName.name = originalName.name;
       } else {
         originalName.name = hyphenToCamel(originalName.name);
       }

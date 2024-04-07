@@ -10,6 +10,7 @@ import transformSvg from './transformSvg';
 import fileExistsWithCaseSync from './fileExistsWithCaseSync';
 
 let ignoreRegex;
+let includeRegex;
 
 export default declare(({
   assertVersion,
@@ -48,9 +49,18 @@ export default declare(({
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const {
+      ignorePattern, includePattern, caseSensitive, filename: providedFilename,
+    } = state.opts;
     const { file, filename } = state;
     let newPath;
+    if (includePattern) {
+      includeRegex = includeRegex || new RegExp(includePattern);
+
+      if (!includeRegex.test(importPath)) {
+        return undefined;
+      }
+    }
     if (ignorePattern) {
       // Only set the ignoreRegex once:
       ignoreRegex = ignoreRegex || new RegExp(ignorePattern);

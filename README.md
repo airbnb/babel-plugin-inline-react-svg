@@ -44,6 +44,7 @@ npm install --save-dev babel-plugin-inline-react-svg
 
 - `ignorePattern` - A pattern that imports will be tested against to selectively ignore imports.
 - `caseSensitive` - A boolean value that if true will require file paths to match with case-sensitivity. Useful to ensure consistent behavior if working on both a case-sensitive operating system like Linux and a case-insensitive one like OS X or Windows.
+- *`spreadDefaultProps`* - A boolean value that if `true` will spread additional props, rather than setting them as `defaultProps` static assignment. This is important for tree shaking, as static assignments prevent efficient dead code removal.
 - `svgo` - svgo options (`false` to disable). Example:
 ```json
 {

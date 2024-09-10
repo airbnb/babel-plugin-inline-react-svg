@@ -39,9 +39,26 @@ export default declare(({
     `;
 
     if (SVG_NAME !== 'default') {
-      return template(namedTemplate)({ SVG_NAME, SVG_CODE, SVG_DEFAULT_PROPS_CODE });
+      const substitutions = { SVG_CODE, SVG_NAME };
+
+      // If a key is present in the substitutions object, but is unused in the template, even if
+      // even if it's value is undefined, Babel will throw an error.
+      if (SVG_DEFAULT_PROPS_CODE) {
+        substitutions.SVG_DEFAULT_PROPS_CODE = SVG_DEFAULT_PROPS_CODE;
+      }
+
+      return template(namedTemplate)(substitutions);
     }
-    return template(anonymousTemplate)({ SVG_CODE, SVG_DEFAULT_PROPS_CODE, EXPORT_FILENAME });
+
+    const substitutions = { SVG_CODE, EXPORT_FILENAME };
+
+    // If a key is present in the substitutions object, but is unused in the template, even if
+    // even if it's value is undefined, Babel will throw an error.
+    if (SVG_DEFAULT_PROPS_CODE) {
+      substitutions.SVG_DEFAULT_PROPS_CODE = SVG_DEFAULT_PROPS_CODE;
+    }
+
+    return template(anonymousTemplate)(substitutions);
   };
 
   function applyPlugin(importIdentifier, importPath, path, state, isExport, exportFilename) {
@@ -95,8 +112,9 @@ export default declare(({
         EXPORT_FILENAME: exportFilename,
       };
 
-      // Move props off of element and into defaultProps
-      if (svgCode.openingElement.attributes.length > 1) {
+      // Move props off of element and into defaultProps, but only if
+      // the "spreadDefaultProps" argument is not true
+      if (state.opts.spreadDefaultProps !== true && svgCode.openingElement.attributes.length > 1) {
         const keepProps = [];
         const defaultProps = [];
 

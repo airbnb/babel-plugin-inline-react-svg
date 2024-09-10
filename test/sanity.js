@@ -14,8 +14,20 @@ function assertReactImport(result) {
   }
 }
 
+function assertSpreadProps(result) {
+  const hasSpreadProps = result.code.match(/_extends\(\{.*"'data-name'": "Livello 1".*\}, props\)/gs);
+  if (!hasSpreadProps) {
+    throw new Error('Spread props were not found');
+  }
+
+  const hasDefaultProps = result.code.match(/\.defaultProps/g);
+  if (hasDefaultProps) {
+    throw new Error('Default props were found, when spread should have been used instead');
+  }
+}
+
 function validateDefaultProps(result) {
-  if (!(/'data-name':/g).test(result.code)) {
+  if (!(/'data-name':?/g).test(result.code)) {
     throw new Error('data-* props need to be quoted');
   }
 }
@@ -226,3 +238,14 @@ transformFile('test/fixtures/test-commented.jsx', {
   console.log('test/fixtures/test-commented.jsx', result.code);
 });
 */
+transformFile('test/fixtures/test-export-default-as.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    [inlineReactSvgPlugin, { spreadDefaultProps: true }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  console.log('test/fixtures/test-export-default-as.jsx', result.code);
+  validateDefaultProps(result);
+  assertSpreadProps(result);
+});

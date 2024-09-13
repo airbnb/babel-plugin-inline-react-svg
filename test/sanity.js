@@ -14,12 +14,6 @@ function assertReactImport(result) {
   }
 }
 
-function validateDefaultProps(result) {
-  if (!(/'data-name':/g).test(result.code)) {
-    throw new Error('data-* props need to be quoted');
-  }
-}
-
 transformFile('test/fixtures/test-import.jsx', {
   babelrc: false,
   presets: ['@babel/preset-react'],
@@ -29,7 +23,6 @@ transformFile('test/fixtures/test-import.jsx', {
 }, (err, result) => {
   if (err) throw err;
   assertReactImport(result);
-  validateDefaultProps(result);
   console.log('test/fixtures/test-import.jsx', result.code);
 });
 
@@ -42,7 +35,6 @@ transformFile('test/fixtures/test-multiple-svg.jsx', {
 }, (err, result) => {
   if (err) throw err;
   assertReactImport(result);
-  validateDefaultProps(result);
   console.log('test/fixtures/test-multiple-svg.jsx', result.code);
 });
 
@@ -56,7 +48,6 @@ transformFile('test/fixtures/test-no-react.jsx', {
   if (err) throw err;
   console.log('test/fixtures/test-no-react.jsx', result.code);
   assertReactImport(result);
-  validateDefaultProps(result);
 });
 
 transformFile('test/fixtures/test-no-duplicate-react.jsx', {
@@ -80,7 +71,6 @@ transformFile('test/fixtures/test-no-duplicate-react.jsx', {
   if (err) throw err;
   console.log('test/fixtures/test-no-duplicate-react.jsx', result.code);
   assertReactImport(result);
-  validateDefaultProps(result);
 });
 
 if (fs.existsSync(path.resolve('./PACKAGE.JSON'))) {

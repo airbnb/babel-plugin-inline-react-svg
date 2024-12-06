@@ -78,6 +78,7 @@
     "ignore": [
       "!lib",
       "src",
+      "test",
       ".github/workflows"
     ]
   }

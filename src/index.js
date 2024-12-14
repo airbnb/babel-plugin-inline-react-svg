@@ -25,30 +25,51 @@ export default declare(({
     SVG_NAME,
     SVG_CODE,
     SVG_DEFAULT_PROPS_CODE,
+    EMIT_DEPRECATED_DEFAULT_PROPS,
   }) => {
+    const defaultProps = SVG_DEFAULT_PROPS_CODE
+      ? 'var props = objectAssignPolyfill()({}, SVG_DEFAULT_PROPS_CODE, overrides);'
+      : '';
+    const PROPS_NAME = SVG_DEFAULT_PROPS_CODE ? 'overrides' : 'props';
+
     const namedTemplate = `
-      var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
-      ${SVG_DEFAULT_PROPS_CODE ? 'SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
+      var SVG_NAME = function SVG_NAME(PROPS_NAME) { ${defaultProps} return SVG_CODE; };
+      ${SVG_DEFAULT_PROPS_CODE && EMIT_DEPRECATED_DEFAULT_PROPS ? 'SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
       ${IS_EXPORT ? 'export { SVG_NAME };' : ''}
     `;
     const anonymousTemplate = `
-      var Component = function (props) { return SVG_CODE; };
-      ${SVG_DEFAULT_PROPS_CODE ? 'Component.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
+      var Component = function (PROPS_NAME) { ${defaultProps}; return SVG_CODE; };
+      ${SVG_DEFAULT_PROPS_CODE && EMIT_DEPRECATED_DEFAULT_PROPS ? 'Component.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
       Component.displayName = 'EXPORT_FILENAME';
       export default Component;
     `;
 
     if (SVG_NAME !== 'default') {
-      return template(namedTemplate)({ SVG_NAME, SVG_CODE, SVG_DEFAULT_PROPS_CODE });
+      return template(namedTemplate)({
+        SVG_NAME,
+        SVG_CODE,
+        SVG_DEFAULT_PROPS_CODE,
+        PROPS_NAME,
+      });
     }
-    return template(anonymousTemplate)({ SVG_CODE, SVG_DEFAULT_PROPS_CODE, EXPORT_FILENAME });
+    return template(anonymousTemplate)({
+      SVG_CODE,
+      SVG_DEFAULT_PROPS_CODE,
+      EXPORT_FILENAME,
+      PROPS_NAME,
+    });
   };
 
   function applyPlugin(importIdentifier, importPath, path, state, isExport, exportFilename) {
     if (typeof importPath !== 'string') {
       throw new TypeError('`applyPlugin` `importPath` must be a string');
     }
-    const { ignorePattern, caseSensitive, filename: providedFilename } = state.opts;
+    const {
+      ignorePattern,
+      caseSensitive,
+      filename: providedFilename,
+      emitDeprecatedDefaultProps = false,
+    } = state.opts;
     const { file, filename } = state;
     let newPath;
     if (ignorePattern) {
@@ -93,6 +114,8 @@ export default declare(({
         SVG_CODE: svgCode,
         IS_EXPORT: isExport,
         EXPORT_FILENAME: exportFilename,
+        // https://github.com/facebook/react/pull/16210
+        EMIT_DEPRECATED_DEFAULT_PROPS: emitDeprecatedDefaultProps,
       };
 
       // Move props off of element and into defaultProps
@@ -124,6 +147,8 @@ export default declare(({
 
       file.get('ensureReact')();
       file.set('ensureReact', () => {});
+      file.get('ensureObjectAssign')();
+      file.set('ensureObjectAssign', () => {});
     }
     return newPath;
   }
@@ -138,6 +163,20 @@ export default declare(({
           if (typeof filename === 'undefined' && typeof opts.filename !== 'string') {
             throw new TypeError('the "filename" option is required when transforming code');
           }
+
+          if (!path.scope.hasBinding('object.assign/polyfill')) {
+            const assignDeclaration = t.importDeclaration([
+              t.importDefaultSpecifier(t.identifier('objectAssignPolyfill')),
+            ], t.stringLiteral('object.assign/polyfill'));
+
+            file.set('ensureObjectAssign', () => {
+              const [newPath] = path.unshiftContainer('body', assignDeclaration);
+              newPath.get('specifiers').forEach((specifier) => { path.scope.registerBinding('module', specifier); });
+            });
+          } else {
+            file.set('ensureObjectAssign', () => {});
+          }
+
           if (!path.scope.hasBinding('React')) {
             const reactImportDeclaration = t.importDeclaration([
               t.importDefaultSpecifier(t.identifier('React')),

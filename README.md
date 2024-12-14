@@ -44,6 +44,7 @@ npm install --save-dev babel-plugin-inline-react-svg
 
 - `ignorePattern` - A pattern that imports will be tested against to selectively ignore imports.
 - `caseSensitive` - A boolean value that if true will require file paths to match with case-sensitivity. Useful to ensure consistent behavior if working on both a case-sensitive operating system like Linux and a case-insensitive one like OS X or Windows.
+- `emitDeprecatedDefaultProps` - A boolean value that if true will make the package keep emitting the [deprecated](https://github.com/facebook/react/pull/16210) `.defaultProps` declaration for the generated SVG components 
 - `svgo` - svgo options (`false` to disable). Example:
 ```json
 {

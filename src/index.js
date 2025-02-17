@@ -27,14 +27,18 @@ export default declare(({
     SVG_DEFAULT_PROPS_CODE,
   }) => {
     const namedTemplate = `
-      var SVG_NAME = function SVG_NAME(props) { return SVG_CODE; };
-      ${SVG_DEFAULT_PROPS_CODE ? 'SVG_NAME.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
+      var SVG_NAME = createReactClass({
+        render: function() { var props = this.props; return SVG_CODE; },
+        ${SVG_DEFAULT_PROPS_CODE ? 'getDefaultProps: function() { return SVG_DEFAULT_PROPS_CODE; }' : ''}
+      });
       ${IS_EXPORT ? 'export { SVG_NAME };' : ''}
     `;
     const anonymousTemplate = `
-      var Component = function (props) { return SVG_CODE; };
-      ${SVG_DEFAULT_PROPS_CODE ? 'Component.defaultProps = SVG_DEFAULT_PROPS_CODE;' : ''}
-      Component.displayName = 'EXPORT_FILENAME';
+      var Component = createReactClass({
+        displayName: EXPORT_FILENAME,
+        render: function() { var props = this.props; return SVG_CODE; },
+        ${SVG_DEFAULT_PROPS_CODE ? 'getDefaultProps: function() { return SVG_DEFAULT_PROPS_CODE; }' : ''}
+      });
       export default Component;
     `;
 
@@ -124,6 +128,8 @@ export default declare(({
 
       file.get('ensureReact')();
       file.set('ensureReact', () => {});
+      file.get('ensureCreateReactClass')();
+      file.set('ensureCreateReactClass', () => {});
     }
     return newPath;
   }
@@ -138,6 +144,20 @@ export default declare(({
           if (typeof filename === 'undefined' && typeof opts.filename !== 'string') {
             throw new TypeError('the "filename" option is required when transforming code');
           }
+
+          if (!path.scope.hasBinding('create-react-class')) {
+            const assignDeclaration = t.importDeclaration([
+              t.importDefaultSpecifier(t.identifier('createReactClass')),
+            ], t.stringLiteral('create-react-class'));
+
+            file.set('ensureCreateReactClass', () => {
+              const [newPath] = path.unshiftContainer('body', assignDeclaration);
+              newPath.get('specifiers').forEach((specifier) => { path.scope.registerBinding('module', specifier); });
+            });
+          } else {
+            file.set('ensureCreateReactClass', () => {});
+          }
+
           if (!path.scope.hasBinding('React')) {
             const reactImportDeclaration = t.importDeclaration([
               t.importDefaultSpecifier(t.identifier('React')),

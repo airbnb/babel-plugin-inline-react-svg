@@ -59,6 +59,7 @@
   "dependencies": {
     "@babel/helper-plugin-utils": "^7.0.0",
     "@babel/parser": "^7.0.0",
+    "create-react-class": "^15.7.0",
     "lodash.isplainobject": "^4.0.6",
     "resolve": "^2.0.0-next.5",
     "svgo": "^2.8.0"

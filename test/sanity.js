@@ -4,13 +4,31 @@ import path from 'path';
 import transformTs from '@babel/plugin-transform-typescript';
 import inlineReactSvgPlugin from '../src';
 
-function assertReactImport(result) {
-  const match = result.code.match(/import React from ['"]react['"]/g);
-  if (!match) {
-    throw new Error('no React import found');
+function assertMatchImport(name, matchRegex) {
+  return (result) => {
+    const match = result.code.match(matchRegex());
+    if (!match) {
+      throw new Error(`no ${name} import found`);
+    }
+    if (match.length !== 1) {
+      throw new Error(`more or less than one match found: ${match}\n${result.code}`);
+    }
+  };
+}
+
+const assertReactImport = assertMatchImport('React', () => /import React from ['"]react['"]/g);
+
+const assertCreateReactClassImport = assertMatchImport('createReactClass', () => /import createReactClass from ['"]create-react-class['"]/g);
+
+function assertDefaultProps(shouldExist, result) {
+  const exists = (/getDefaultProps:/g).test(result.code);
+
+  if (!exists && shouldExist) {
+    throw new Error('getDefaultProps needs to be present');
   }
-  if (match.length !== 1) {
-    throw new Error(`more or less than one match found: ${match}\n${result.code}`);
+
+  if (exists && !shouldExist) {
+    throw new Error('getDefaultProps shouldn\'t be present');
   }
 }
 
@@ -29,8 +47,10 @@ transformFile('test/fixtures/test-import.jsx', {
 }, (err, result) => {
   if (err) throw err;
   assertReactImport(result);
+  assertCreateReactClassImport(result);
+  assertDefaultProps(true, result);
   validateDefaultProps(result);
-  console.log('test/fixtures/test-import.jsx', result.code);
+  console.log('test/fixtures/test-import.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-multiple-svg.jsx', {
@@ -42,8 +62,10 @@ transformFile('test/fixtures/test-multiple-svg.jsx', {
 }, (err, result) => {
   if (err) throw err;
   assertReactImport(result);
+  assertCreateReactClassImport(result);
+  assertDefaultProps(true, result);
   validateDefaultProps(result);
-  console.log('test/fixtures/test-multiple-svg.jsx', result.code);
+  console.log('test/fixtures/test-multiple-svg.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-no-react.jsx', {
@@ -54,8 +76,10 @@ transformFile('test/fixtures/test-no-react.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-no-react.jsx', result.code);
+  console.log('test/fixtures/test-no-react.jsx\n', result.code);
   assertReactImport(result);
+  assertCreateReactClassImport(result);
+  assertDefaultProps(true, result);
   validateDefaultProps(result);
 });
 
@@ -78,8 +102,10 @@ transformFile('test/fixtures/test-no-duplicate-react.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-no-duplicate-react.jsx', result.code);
+  console.log('test/fixtures/test-no-duplicate-react.jsx\n', result.code);
   assertReactImport(result);
+  assertCreateReactClassImport(result);
+  assertDefaultProps(true, result);
   validateDefaultProps(result);
 });
 
@@ -111,7 +137,7 @@ transformFile('test/fixtures/test-no-svg-or-react.js', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-no-svg-or-react.js', result.code);
+  console.log('test/fixtures/test-no-svg-or-react.js\n', result.code);
   if (/React/.test(result.code)) {
     throw new Error('Test failed: React import was present');
   }
@@ -145,7 +171,7 @@ transformFile('test/fixtures/test-dynamic-require.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-dynamic-require.jsx', result.code);
+  console.log('test/fixtures/test-dynamic-require.jsx\n', result.code);
 });
 
 const filename = 'test/fixtures/test-import-read-file.jsx';
@@ -156,7 +182,7 @@ transform(fs.readFileSync(filename), {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-import-read-file.jsx', result.code);
+  console.log('test/fixtures/test-import-read-file.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-export-default.jsx', {
@@ -166,7 +192,7 @@ transformFile('test/fixtures/test-export-default.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-export-default.jsx', result.code);
+  console.log('test/fixtures/test-export-default.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-export-default-as.jsx', {
@@ -182,7 +208,7 @@ transformFile('test/fixtures/test-export-default-as.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-export-default-as.jsx', result.code);
+  console.log('test/fixtures/test-export-default-as.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-export-all-as.jsx', {
@@ -192,7 +218,7 @@ transformFile('test/fixtures/test-export-all-as.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-export-all-as.jsx', result.code);
+  console.log('test/fixtures/test-export-all-as.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-root-styled.jsx', {
@@ -202,7 +228,7 @@ transformFile('test/fixtures/test-root-styled.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-root-styled.jsx', result.code);
+  console.log('test/fixtures/test-root-styled.jsx\n', result.code);
 });
 
 transformFile('test/fixtures/test-commented.jsx', {
@@ -212,7 +238,18 @@ transformFile('test/fixtures/test-commented.jsx', {
   ],
 }, (err, result) => {
   if (err) throw err;
-  console.log('test/fixtures/test-commented.jsx', result.code);
+  console.log('test/fixtures/test-commented.jsx\n', result.code);
+});
+
+transformFile('test/fixtures/test-props.jsx', {
+  presets: ['airbnb'],
+  plugins: [
+    [inlineReactSvgPlugin, { emitDeprecatedDefaultProps: true }],
+  ],
+}, (err, result) => {
+  if (err) throw err;
+  assertDefaultProps(true, result);
+  console.log('test/fixtures/test-props.jsx\n', result.code);
 });
 
 /* TODO: uncomment if babel fixes its parsing for SVGs
